@@ -420,7 +420,8 @@ const ITEM_DEFS = [
   { flag:'hasCharm', name:'陈默的护身符', desc:'一块红色的布包。理智低于29时自动触发。',
     view(){ return { title:'护 身 符', html:`<p>陈默塞给你的红布包，里面是硬硬的东西。</p><p class="g">【被动】当理智低于 29 时，它会自动燃烧，恢复 70 点理智。</p><p class="d">陈默说：戴着吧。也许用不上。</p><p class="d">她说话的时候，没看你的眼睛。</p>`}; } }
   ,{ flag:'hasBell', name:'温瑶的铃铛', desc:'温瑶塞给你的。她说戴着会好运。',
-    view(){ return { title:'温 瑶 的 铃 铛', html:`<p>一枚很小的铜铃铛，红绳系着。</p><p class="g">【被动】理智低于 29 时自动触发，恢复 60 点理智。</p><p class="d">你摇了一下。声音很清脆。</p><p class="d">但你总觉得，这声音好像在哪里听过。</p>`}; } }
+    view(){ const uses = S.flags.bellUses || 0; const remain = 2 - uses;
+      return { title:'温 瑶 的 铃 铛', html:`<p>一枚很小的铜铃铛，红绳系着。</p><p class="g">【被动】理智低于 29 时自动触发，恢复 60 点理智。</p><p class="g">【剩余可使用 ${remain} / 2 次】</p><p class="d">你摇了一下。声音很清脆。</p><p class="d">但你总觉得，这声音好像在哪里听过。</p>`}; } }
   ,{ flag:'hasUmbrella', name:'温瑶的伞', desc:'下雨天她借给你的。',
     view(){ return { title:'温 瑶 的 伞', html:`<p>一把黑色的折叠伞。伞骨上刻着一个小小的"瑶"字。</p><p class="g">【被动】理智低于 20 时自动触发，恢复 30 点理智。</p><p class="d">奇怪的是，那天她把伞递给你的时候，自己淋着雨走的。</p><p class="d">你回头时，她站的地方，地面是干的。</p>`}; } }
   ,{ flag:'hasDiary', name:'温瑶的日记', desc:'从图书馆夹层找到的。',
@@ -955,7 +956,7 @@ const STORY = {
 "j_diary_3":{ch:"隐藏",title:"季默的日记 · 最后一页",
   text:`你翻到最后一页。\n\n只有一行字。\n\n写得很大，很用力。\n\n<span class="r">"10 月 14 日，我替她签了。"</span>\n\n<span class="r">"她说她会回来救我。"</span>\n\n<span class="r">"她没有。"</span>\n\n<span class="r">"她在骗我。"</span>\n\n<span class="r">"但她没有骗你。"</span>\n\n<span class="r">"因为她喜欢你。"</span>\n\n<span class="r">"就像当年，喜欢我一样。"</span>\n\n<span class="d">（你终于明白，季默为什么会袭击你。）</span>`,
   choices:[
-    {t:"合上日记，离开",to:"j_leave_402",san:-10,set:{knowJinmoTruth:true}},
+    {t:"合上日记，转身离开",to:"e_jinmo_dead",san:-10,set:{knowJinmoTruth:true}},
     {t:"把温瑶的日记，留在他的床头",to:"e_jinmo_free",san:-8,
       need:(S)=>S.flags.hasDiary,lockHint:"需要温瑶的日记"}
   ]},
@@ -1554,7 +1555,7 @@ const STORY = {
   choices:[
     {t:"站起来，冲上讲台把黑板砸了",to:"t_smash",san:-25},
     {t:"站起来，往外跑",to:"t_13f_run",san:-22},
-    {t:"坐着不动",to:"e_13f_end",san:-30},
+    {t:"坐着不动",to:"e_13f_class",san:-30},
     {t:"不去反抗，安静地坐下听课",to:"e_selfstudy",san:-25,danger:true}
   ]},
 "t_smash":{ch:"教学楼",title:"砸",
@@ -2012,8 +2013,21 @@ const STORY = {
 /* ═══════════════════════════════════════════════════════════
    引擎
    ═══════════════════════════════════════════════════════════ */
-const $ = id => document.getElementById(id);
-let typingTimer = null;
+const ONCE_ONLY_ITEMS = ['hasCharm','hasTea','hasUmbrella','hasNote','hasCoin','hasBell'];
+function applyFlags(setObj){
+  if(!setObj) return;
+  const filtered = {};
+  Object.keys(setObj).forEach(k=>{
+    if(ONCE_ONLY_ITEMS.includes(k)){
+      if(S.flags[k + 'Obtained']) return;
+      filtered[k] = setObj[k];
+      filtered[k + 'Obtained'] = true;
+    } else {
+      filtered[k] = setObj[k];
+    }
+  });
+  Object.assign(S.flags, filtered);
+}
 
 function toast(msg){
   const t = $('toast'); t.textContent = msg; t.classList.add('on');
@@ -2133,9 +2147,14 @@ function checkAutoCharm(){
     return;
   }
   if(S.sanity < 29 && S.flags.hasBell){
-    S.flags.hasBell = false;
+    S.flags.bellUses = (S.flags.bellUses || 0) + 1;
     S.sanity = clamp(S.sanity + 60, 0, 100);
-    toast('温瑶的铃铛自动响起！理智 +60');
+    if(S.flags.bellUses >= 2){
+      S.flags.hasBell = false;
+      toast('温瑶的铃铛自动响起！理智 +60（最后一次）');
+    } else {
+      toast('温瑶的铃铛自动响起！理智 +60（还可使用 1 次）');
+    }
     triggerHorrorEffect('light');
     return;
   }
@@ -2247,7 +2266,7 @@ function renderInteractOptions(list){
     b.innerHTML = o.t;
     b.onclick = ()=>{
       if(o.san) S.sanity = clamp(S.sanity + o.san, 0, 100);
-      if(o.set) Object.assign(S.flags, o.set);
+      if(o.set) applyFlags(o.set);
       checkAutoCharm();
       if(o.danger || (o.san && o.san <= -10)) triggerHorrorEffect('heavy');
       closeInteract(); updateHUD();
@@ -2339,7 +2358,7 @@ function goto(id){
   if(!S.entered[id]){
     S.entered[id] = true;
     if(n.san){ sanLoss = n.san; S.sanity += n.san; }
-    if(n.set) Object.assign(S.flags, n.set);
+    if(n.set) applyFlags(n.set);
   }
   S.sanity = clamp(S.sanity, 0, 100);
 
@@ -2401,7 +2420,7 @@ function render(noAnim){
       if(locked){ toast('条件未满足：' + (c.lockHint || '')); return; }
       if(c.act === 'camera' || c.act === 'interact' || c.act === 'dodge'){
         if(c.san) S.sanity = clamp(S.sanity + c.san, 0, 100);
-        if(c.set) Object.assign(S.flags, c.set);
+        if(c.set) applyFlags(c.set);
         checkAutoCharm();
         updateHUD();
         if(c.act === 'camera') openCamera(c.to);
@@ -2411,7 +2430,7 @@ function render(noAnim){
       }
       S.used[key] = true;
       if(c.san) S.sanity += c.san;
-      if(c.set) Object.assign(S.flags, c.set);
+      if(c.set) applyFlags(c.set);
       S.sanity = clamp(S.sanity,0,100);
       checkAutoCharm();
       S.sanity = clamp(S.sanity,0,100);
