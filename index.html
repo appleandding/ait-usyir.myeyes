@@ -360,7 +360,7 @@ let SLOTS = { auto:null, s1:null, s2:null, s3:null, s4:null, s5:null, s6:null };
 let S = null;
 let finalTensionTimer = null;
 function newState(){
-  return { node:'start', sanity:100, flags:{ hasPhone:true }, used:{}, entered:{}, steps:0, t:Date.now() };
+  return { node:'start', sanity:100, flags:{ hasPhone:true }, obtained:{}, used:{}, entered:{}, steps:0, t:Date.now() };
 }
 function loadSaves(){ try{ const raw = localStorage.getItem(SAVE_KEY); if(raw){ const d = JSON.parse(raw); if(d && typeof d==='object') SLOTS = Object.assign(SLOTS,d); } }catch(e){} }
 function persist(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(SLOTS)); }catch(e){ toast('存档失败'); } }
@@ -370,6 +370,7 @@ function loadFrom(slot){
   if(!SLOTS[slot]) { toast('该存档位为空'); return false; }
   S = clone(SLOTS[slot].state); S.node = SLOTS[slot].node;
   if(S.flags.hasPhone === undefined) S.flags.hasPhone = true;
+  if(!S.obtained) S.obtained = {};
   if(finalTensionTimer){ clearInterval(finalTensionTimer); finalTensionTimer = null; }
   closeMask(); closeViewer(); closeInteract(); render(true); return true;
 }
@@ -2013,15 +2014,19 @@ const STORY = {
 /* ═══════════════════════════════════════════════════════════
    引擎
    ═══════════════════════════════════════════════════════════ */
+const $ = id => document.getElementById(id);
+let typingTimer = null;
+
 const ONCE_ONLY_ITEMS = ['hasCharm','hasTea','hasUmbrella','hasNote','hasCoin','hasBell'];
 function applyFlags(setObj){
   if(!setObj) return;
+  if(!S.obtained) S.obtained = {};
   const filtered = {};
   Object.keys(setObj).forEach(k=>{
     if(ONCE_ONLY_ITEMS.includes(k)){
-      if(S.flags[k + 'Obtained']) return;
+      if(S.obtained[k]) return;
       filtered[k] = setObj[k];
-      filtered[k + 'Obtained'] = true;
+      S.obtained[k] = true;
     } else {
       filtered[k] = setObj[k];
     }
@@ -2507,6 +2512,7 @@ function initTitle(){
     if(SLOTS.auto){
       S = clone(SLOTS.auto.state); S.node = SLOTS.auto.node;
       if(S.flags.hasPhone === undefined) S.flags.hasPhone = true;
+      if(!S.obtained) S.obtained = {};
       hideTitle(); render(true);
     }
   };
