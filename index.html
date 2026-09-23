@@ -329,6 +329,7 @@ body.heal-flash{animation:healFlash .8s ease;}
 const SAVE_KEY = 'linjiang_saves_v3';
 let SLOTS = { auto:null, s1:null, s2:null, s3:null, s4:null };
 let S = null;
+let finalTensionTimer = null;
 function newState(){
   return { node:'start', sanity:100, flags:{ hasPhone:true }, used:{}, entered:{}, steps:0, t:Date.now() };
 }
@@ -340,6 +341,7 @@ function loadFrom(slot){
   if(!SLOTS[slot]) { toast('该存档位为空'); return false; }
   S = clone(SLOTS[slot].state); S.node = SLOTS[slot].node;
   if(S.flags.hasPhone === undefined) S.flags.hasPhone = true;
+  if(finalTensionTimer){ clearInterval(finalTensionTimer); finalTensionTimer = null; }
   closeMask(); closeViewer(); closeInteract(); render(true); return true;
 }
 function autoSave(){ saveTo('auto'); }
@@ -357,7 +359,7 @@ const ITEM_DEFS = [
   { flag:'hasRules', name:'寝室公约', desc:'从 403 门后抄下来的规则。',
     view(){ return { title:'403 寝室规则', html: RULES_HTML }; } },
   { flag:'hasCoin', name:'铜钱', usable:true, desc:'陈默塞给你的。',
-    view(){ return { title:'铜 钱', html:`<div style="text-align:center;padding:14px 0 20px"><div style="display:inline-block;width:88px;height:88px;border-radius:50%;background:radial-gradient(circle at 38% 32%,#d8bd7c,#8a6f3a 55%,#4a3a18);box-shadow:0 0 34px rgba(179,154,95,.5), inset 0 0 20px rgba(0,0,0,.5);position:relative"><div style="position:absolute;inset:34%;background:#141210;border-radius:3px;box-shadow:inset 0 0 8px rgba(0,0,0,.9)"></div></div><div style="margin-top:14px;font-size:12px;letter-spacing:.3em;color:#8a7a55">红 绳 已 褪 色</div></div><p>陈默把它塞进你手里时说：戴着，睡觉也别摘。</p><p>你问它能挡什么。她说挡不了什么——<span class="g">只是让你下次数的时候，数得慢一点。</span></p><p class="r">铜钱还是温的。它一直在发烫。</p><p class="d">【可使用 · 仅一次】咬碎它，能唤回大量神志（理智 +60）。</p>`}; } },
+    view(){ return { title:'铜 钱', html:`<div style="text-align:center;padding:14px 0 20px"><div style="display:inline-block;width:88px;height:88px;border-radius:50%;background:radial-gradient(circle at 38% 32%,#d8bd7c,#8a6f3a 55%,#4a3a18);box-shadow:0 0 34px rgba(179,154,95,.5), inset 0 0 20px rgba(0,0,0,.5);position:relative"><div style="position:absolute;inset:34%;background:#141210;border-radius:3px;box-shadow:inset 0 0 8px rgba(0,0,0,.9)"></div></div><div style="margin-top:14px;font-size:12px;letter-spacing:.3em;color:#8a7a55">红 绳 已 褪 色</div></div><p>陈默把它塞进你手里时说：戴着，睡觉也别摘。</p><p>你问它能挡什么。她说挡不了什么——<span class="g">只是让你下次数的时候，数得慢一点。</span></p><p class="r">铜钱还是温的。它一直在发烫。</p><p class="d">【可使用 · 仅一次】咬碎它，能唤回大量神志（理智 +80）。</p>`}; } },
   { flag:'coinUsed', name:'铜钱的灰烬', desc:'铜钱已经碎了。',
     view(){ return { title:'铜 钱 的 灰 烬', html:`<p>铜钱碎了。</p><p>碎片像灰一样散在掌心，风一吹就没了。</p><p class="d">只剩下那截红绳，还系在手腕上，再也暖不起来了。</p>`}; } },
   { flag:'hasBook', name:'临江校志', desc:'1999 年版。可以翻阅。',
@@ -383,7 +385,11 @@ const ITEM_DEFS = [
   { flag:'hasPhoto4', name:'四人合影', desc:'在第四张床的枕头下找到的。',
     view(){ return { title:'四 人 合 影', html:`<p>一张发黄的照片。四个女生站在 403 门口，笑得很开心。</p><p>其中三个是苏也、李薇、陈默。</p><p class="r">第四个是你。</p><p class="r">而你穿的那件外套，是深蓝色的。</p><p class="d">照片背面，写着一行很轻的字：「第 4 届」。</p>`}; } },
   { flag:'hasXiaoManBook', name:'小满的书', desc:'从湖里捞上来的。',
-    view(){ return { title:'小 满 的 书', html:`<p>书脊上的名字是「小满」。</p><p>第一页：「2024 年 9 月 8 日，我开始在操场上跑步。」</p><p>「跑到第十圈，就能看见我。」</p><p>「如果有人愿意记住我，我就能休息了。」</p><p class="g">最后一页：「如果你读到了这一页，请告诉我，你记住我了。」</p>`}; } }
+    view(){ return { title:'小 满 的 书', html:`<p>书脊上的名字是「小满」。</p><p>第一页：「2024 年 9 月 8 日，我开始在操场上跑步。」</p><p>「跑到第十圈，就能看见我。」</p><p>「如果有人愿意记住我，我就能休息了。」</p><p class="g">最后一页：「如果你读到了这一页，请告诉我，你记住我了。」</p>`}; } },
+  { flag:'hasTea', name:'静心茶', desc:'从校医室拿的。理智低于29时自动消耗。',
+    view(){ return { title:'静 心 茶', html:`<p>一包干茶叶，闻起来有点苦涩。</p><p class="g">【被动】当理智低于 29 时，会自动消耗并恢复 50 点理智。</p><p class="d">（你不需要手动使用它。它会自己救你。）</p>`}; } },
+  { flag:'hasCharm', name:'陈默的护身符', desc:'一块红色的布包。理智低于29时自动触发。',
+    view(){ return { title:'护 身 符', html:`<p>陈默塞给你的红布包，里面是硬硬的东西。</p><p class="g">【被动】当理智低于 29 时，它会自动燃烧，恢复 70 点理智。</p><p class="d">陈默说：戴着吧。也许用不上。</p><p class="d">她说话的时候，没看你的眼睛。</p>`}; } }
 ];
 const MANUAL_HTML = `
   <div class="doc-cover"><div class="ct">临 江 大 学</div><div class="cs">新 生 手 册</div><div class="cn">403</div></div>
@@ -838,8 +844,12 @@ const STORY = {
     {t:"不吃了，直接去教学楼",to:"t_enter"},
     {t:"回寝室找陈默聊聊",to:"d_chen_talk"},
     {t:"去操场走走，看那个跑步的女生",to:"m_playground"},
-    {t:"去教务处，问能不能退学",to:"campus_admin",san:-6}
+    {t:"去教务处，问能不能退学",to:"campus_admin",san:-6},
+    {t:"去一趟校医室，拿点药",to:"d_clinic"}
   ]},
+"d_clinic":{ch:"校园",title:"校医室",
+  text:`你推开门。\n\n校医室的灯亮着，但里面没有人。\n\n桌上放着一包干茶叶，旁边压着一张纸条：\n\n「如果觉得撑不住，就泡一杯。\n\n一包只能喝一次。\n\n——校医」\n\n你把茶叶收进了口袋。\n\n<span class="d">（静心茶已经放进背包。它会在你理智低于 29 时自动消耗。）</span>`,
+  choices:[{t:"离开校医室",to:"d_morning",set:{hasTea:true}}]},
 "d_chen_talk":{ch:"寝室",title:"陈默",
   text:`你折回寝室。\n\n陈默还躺在床上，背对着门，像是睡着了。\n\n你在自己床沿坐下。\n\n"陈默。"\n\n"嗯。"\n\n"你到底知道多少？"\n\n沉默了很久。\n\n"比你多。"她说，"比她们多。"\n\n"你为什么不走？"\n\n"走不了。"陈默翻过身，看着天花板，"我大一的时候，也想过退学。"\n\n"我去教务处递申请，那个老师看了我一眼，说：'你确定？'"\n\n"我说确定。"\n\n"她就把一本册子推到我面前，让我签字。"\n\n"我签了。"\n\n"然后呢？"\n\n"然后我醒来的时候，还躺在 403 的床上。"陈默说，"签到表的日期是——我入学的第一天。"`,
   choices:[
@@ -849,14 +859,14 @@ const STORY = {
     {t:"问她：陈默，你到底是谁？",to:"e_chen",san:-15}
   ]},
 "d_chen_regret":{ch:"寝室",title:"后悔",
-  text:`"你后悔吗？"\n\n陈默看着天花板，很久。\n\n"后悔什么？"\n\n"后悔签了字。"\n\n她沉默了一会儿。\n\n"不后悔。"\n\n"因为我签了字，苏也才能活。"\n\n"李薇才能活。"\n\n"她们都是上一届的。"\n\n"她们签给了别人，然后别人又签给了别人。"\n\n"我们四个人，就像一条链子。"\n\n"每年，都要有一个人，把链子接下去。"\n\n"今年——"\n\n她转过头，看着你。\n\n"是你。"`,
+  text:`"你后悔吗？"\n\n陈默看着天花板，很久。\n\n"后悔什么？"\n\n"后悔签了字。"\n\n她沉默了一会儿。\n\n"不后悔。"\n\n"因为我签了字，苏也才能活。"\n\n"李薇才能活。"\n\n"她们都是上一届的。"\n\n"她们签给了别人，然后别人又签给了别人。"\n\n"我们四个人，就像一条链子。"\n\n"每年，都要有一个人，把链子接下去。"\n\n"今年——"\n\n她转过头，看着你。\n\n"是你。"\n\n她从枕头底下摸出一个红布包，塞进你手里。\n\n"戴上。"\n\n"这是什么？"\n\n"护身符。"陈默说，"我不会用，你也许用得着。"\n\n<span class="d">（护身符已经放进背包。它会在你理智低于 29 时自动燃烧。）</span>`,
   choices:[
-    {t:"沉默着离开",to:"t_enter",san:-10,set:{chenTrust:5,knowsChain:true}},
-    {t:"问她：如果我不接呢？",to:"d_chen_refuse",san:-8,set:{chenTrust:5,knowsChain:true}}
+    {t:"沉默着离开",to:"d_morning",san:-10,set:{chenTrust:5,knowsChain:true,hasCharm:true}},
+    {t:"问她：如果我不接呢？",to:"d_chen_refuse",san:-8,set:{chenTrust:5,knowsChain:true,hasCharm:true}}
   ]},
 "d_chen_refuse":{ch:"寝室",title:"不接",
   text:`"如果我不接呢？"\n\n陈默看了你很久。\n\n然后她笑了。\n\n那个笑很轻，但很难看。\n\n"那你就是第一年，没有人接的那一年。"\n\n"1987 年，没有人接。"\n\n"那一年，403 的四个人，全没了。"\n\n"1990 年，有人接了。"\n\n"那一年，三个人活了下来。"\n\n她闭上眼睛。\n\n"你决定吧。"`,
-  choices:[{t:"离开寝室，去上课",to:"t_enter",san:-10,set:{chenTrust:5,knowsChain:true}}]},
+  choices:[{t:"离开寝室，回到早晨",to:"d_morning",san:-10,set:{chenTrust:5,knowsChain:true,hasCharm:true}}]},
 "d_chen_book":{ch:"寝室",title:"那本册子",
   text:`"那本册子叫什么名字？"\n\n陈默看着你，很久。\n\n"《临江大学 · 新生手册》。"\n\n你愣住了。你从包里掏出自己那本。\n\n封皮深红，烫金的数字——403。\n\n"我那本上面，印的是 402。"陈默说。\n\n"402 寝室，三年前就不住人了。"\n\n"因为那一年，402 的四个学生，全都没毕业。"\n\n"教务处说她们转学了。"\n\n"但我在图书馆的旧报纸上，看见过一条消息。"\n\n陈默顿了顿。\n\n"1987 年 10 月 14 日，四号宿舍楼 402 寝室，四名学生失踪。"`,
   choices:[
@@ -1176,7 +1186,7 @@ const STORY = {
 
 /* ============ 终章 ============ */
 "t_final":{ch:"终章",title:"10 月 14 日 · 校门口",
-  text:`10 月 14 日，晚上 23:00。\n\n你站在校门口。\n\n风很大。牌匾上的字，红得像要滴下来。\n\n你手里有一张纸——第 403 页。\n\n纸上的名字，已经褪得只剩你自己的了。\n\n你可以把它交出去。\n\n也可以，撕掉它。`,
+  text:`10 月 14 日，晚上 23:00。\n\n你站在校门口。\n\n风很大。牌匾上的字，红得像要滴下来。\n\n你手里有一张纸——第 403 页。\n\n纸上的名字，已经褪得只剩你自己的了。\n\n你可以把它交出去。\n\n也可以，撕掉它。\n\n<span class="d">（你感觉理智正在快速流失。快做出选择。）</span>`,
   choices:[
     {t:"撕掉第 403 页，作废名额",to:"e_grad",san:-10,need:(S)=>S.flags.torePage,lockHint:"需要已撕下第 403 页"},
     {t:"念出所有 39 个名字",to:"e_remember_all",san:-8,need:(S)=>S.flags.rememberXiaoMan && S.flags.savedXiaoMan,lockHint:"需要记住小满"},
@@ -1602,18 +1612,37 @@ function useItem(flag){
     if(S.sanity >= 100){ toast('你现在神志清醒，还用不上它'); return; }
     S.flags.hasCoin = false;
     S.flags.coinUsed = true;
-    S.sanity = clamp(S.sanity + 60, 0, 100);
+    S.sanity = clamp(S.sanity + 80, 0, 100);
     document.body.classList.remove('heal-flash');
     void document.body.offsetWidth;
     document.body.classList.add('heal-flash');
     setTimeout(()=>document.body.classList.remove('heal-flash'), 850);
     closeViewer(); updateHUD();
-    toast('铜钱在掌心碎成灰。理智 +60');
+    toast('铜钱在掌心碎成灰。理智 +80');
     if($('mask').classList.contains('on')) openBag();
     autoSave();
     return;
   }
   toast('这件东西没法用');
+}
+
+// 理智低于 29 自动触发：优先护身符，其次静心茶
+function checkAutoCharm(){
+  if(!S || S.sanity <= 0) return;
+  if(S.sanity < 29 && S.flags.hasCharm){
+    S.flags.hasCharm = false;
+    S.sanity = clamp(S.sanity + 70, 0, 100);
+    toast('陈默的护身符自动燃烧！理智 +70');
+    triggerHorrorEffect('light');
+    return;
+  }
+  if(S.sanity < 29 && S.flags.hasTea){
+    S.flags.hasTea = false;
+    S.sanity = clamp(S.sanity + 50, 0, 100);
+    toast('静心茶自动消耗！理智 +50');
+    triggerHorrorEffect('light');
+    return;
+  }
 }
 
 function renderInteractOptions(list){
@@ -1626,6 +1655,7 @@ function renderInteractOptions(list){
     b.onclick = ()=>{
       if(o.san) S.sanity = clamp(S.sanity + o.san, 0, 100);
       if(o.set) Object.assign(S.flags, o.set);
+      checkAutoCharm();
       if(o.danger || (o.san && o.san <= -10)) triggerHorrorEffect('heavy');
       closeInteract(); updateHUD();
       if(o.to) goto(o.to); else render(true);
@@ -1690,6 +1720,25 @@ const PHOTO_HTML = `
 
 function goto(id){
   if(!STORY[id]){ console.error('缺失节点：', id); return; }
+
+  // 终局高压倒计时：进入 t_final 后每秒 -1 理智
+  if(id === 't_final'){
+    if(finalTensionTimer) clearInterval(finalTensionTimer);
+    finalTensionTimer = setInterval(()=>{
+      if(!S || S.node !== 't_final'){ clearInterval(finalTensionTimer); finalTensionTimer = null; return; }
+      S.sanity = clamp(S.sanity - 1, 0, 100);
+      updateHUD();
+      checkAutoCharm();
+      S.sanity = clamp(S.sanity, 0, 100);
+      if(S.sanity <= 0){
+        clearInterval(finalTensionTimer); finalTensionTimer = null;
+        goto('e_mad');
+      }
+    }, 1000);
+  } else {
+    if(finalTensionTimer){ clearInterval(finalTensionTimer); finalTensionTimer = null; }
+  }
+
   S.node = id; S.steps++;
 
   const n = STORY[id];
@@ -1699,6 +1748,9 @@ function goto(id){
     if(n.san){ sanLoss = n.san; S.sanity += n.san; }
     if(n.set) Object.assign(S.flags, n.set);
   }
+  S.sanity = clamp(S.sanity, 0, 100);
+
+  checkAutoCharm();
   S.sanity = clamp(S.sanity, 0, 100);
 
   if(sanLoss <= -12 || n.danger || id.startsWith('e_') || id.includes('knock_open') || id.includes('13f') || id.includes('stare')){
@@ -1757,6 +1809,7 @@ function render(noAnim){
       if(c.act === 'camera' || c.act === 'interact'){
         if(c.san) S.sanity = clamp(S.sanity + c.san, 0, 100);
         if(c.set) Object.assign(S.flags, c.set);
+        checkAutoCharm();
         updateHUD();
         if(c.act === 'camera') openCamera(c.to); else openInteract(c.it);
         return;
@@ -1764,6 +1817,8 @@ function render(noAnim){
       S.used[key] = true;
       if(c.san) S.sanity += c.san;
       if(c.set) Object.assign(S.flags, c.set);
+      S.sanity = clamp(S.sanity,0,100);
+      checkAutoCharm();
       S.sanity = clamp(S.sanity,0,100);
       if(c.danger || (c.san && c.san <= -10)) triggerHorrorEffect('heavy');
       goto(c.to);
@@ -1821,6 +1876,7 @@ function doLoad(k){
 }
 function doRestart(){
   if(!confirm('确定要重新开始吗？\n\n当前进度将被覆盖，且无法恢复。')) return;
+  if(finalTensionTimer){ clearInterval(finalTensionTimer); finalTensionTimer = null; }
   S = newState(); SLOTS.auto = null; persist();
   closeMask(); closeViewer(); closeInteract(); render(true);
 }
