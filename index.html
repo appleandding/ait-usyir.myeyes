@@ -268,6 +268,23 @@ body.heal-flash{animation:healFlash .8s ease;}
 @keyframes healFlash{0%{filter:brightness(1.75) sepia(.55) saturate(1.5) hue-rotate(-18deg);}60%{filter:brightness(1.15) sepia(.2);}100%{filter:none;}}
 .glitch-txt{display:inline-block;animation:glitchAnim .28s infinite alternate ease-in-out;text-shadow:-1.5px 0 #c04a4a, 1.5px 0 #2a5a8a;}
 @keyframes glitchAnim{0%{transform:skew(0deg);}30%{transform:skew(-6deg) scaleY(1.05);}70%{transform:skew(4deg) translate(-1px, 1px);}100%{transform:skew(0deg);}}
+#dodge{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;background:rgba(60,0,0,.75);backdrop-filter:blur(4px);flex-direction:column;cursor:pointer;user-select:none;}
+#dodge.on{display:flex;animation:dodgeIn .12s ease}
+@keyframes dodgeIn{from{opacity:0}to{opacity:1}}
+#dodge.shake{animation:dodgeShake .08s infinite}
+@keyframes dodgeShake{0%,100%{transform:translate(0,0)}25%{transform:translate(-3px,2px)}50%{transform:translate(3px,-2px)}75%{transform:translate(-2px,-3px)}}
+.dodge-text{font-size:56px;letter-spacing:.2em;color:#fff;text-shadow:0 0 20px #f00,0 0 40px #f00;font-weight:bold;margin-bottom:30px;animation:dodgePulse .3s infinite alternate}
+@keyframes dodgePulse{from{transform:scale(1)}to{transform:scale(1.08)}}
+.dodge-btn{width:min(70vw,320px);height:min(70vw,320px);border-radius:50%;background:radial-gradient(circle at 50% 40%,#fff8e0,#d4a040 60%,#7a5010);border:6px solid #fff;box-shadow:0 0 60px #fff,0 0 100px #f00,inset 0 -10px 30px rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;font-size:40px;color:#2a1810;font-weight:bold;letter-spacing:.1em;}
+.dodge-btn:active{transform:scale(.94)}
+.dodge-count{position:absolute;top:30px;left:0;right:0;text-align:center;font-size:20px;color:#ffd;letter-spacing:.3em}
+.dodge-timer{position:absolute;bottom:80px;width:80%;height:6px;background:rgba(0,0,0,.5);border-radius:3px;overflow:hidden}
+.dodge-timer-bar{height:100%;background:linear-gradient(90deg,#fff,#f00);width:100%;transition:width .05s linear}
+.dodge-hint{position:absolute;bottom:40px;font-size:14px;color:#ffd;letter-spacing:.3em;opacity:.85}
+.dodge-result{position:fixed;inset:0;z-index:210;display:none;align-items:center;justify-content:center;background:rgba(4,5,7,.92);flex-direction:column;padding:20px;text-align:center}
+.dodge-result.on{display:flex;animation:vIn .4s ease}
+.dodge-result h2{font-size:24px;letter-spacing:.3em;margin:0 0 20px;font-weight:400}
+.dodge-result p{font-size:15px;line-height:2;color:#b6b2aa;max-width:460px}
 </style>
 </head>
 <body>
@@ -321,13 +338,25 @@ body.heal-flash{animation:healFlash .8s ease;}
   <div class="cam-tip" id="camTip">点 击 快 门 拍 照</div>
   <button class="cam-done hide" id="camDone" onclick="finishCamera()">收 起 手 机</button>
 </div>
+<div id="dodge">
+  <div class="dodge-count" id="dodgeCount">· 躲 避 ·</div>
+  <div class="dodge-text">⚠</div>
+  <button class="dodge-btn" id="dodgeBtn">躲 ！</button>
+  <div class="dodge-timer"><div class="dodge-timer-bar" id="dodgeTimerBar"></div></div>
+  <div class="dodge-hint" id="dodgeHint">立刻点击按钮 · 时间不多了</div>
+</div>
+<div class="dodge-result" id="dodgeResult">
+  <h2 id="dodgeResultTitle">—</h2>
+  <p id="dodgeResultBody"></p>
+  <button class="ch" style="max-width:260px;text-align:center;margin-top:24px" id="dodgeResultBtn">继 续</button>
+</div>
 <div id="toast"></div>
 <script>
 /* ═══════════════════════════════════════════════════════════
    状态与存档
    ═══════════════════════════════════════════════════════════ */
-const SAVE_KEY = 'linjiang_saves_v3';
-let SLOTS = { auto:null, s1:null, s2:null, s3:null, s4:null };
+const SAVE_KEY = 'linjiang_saves_v4';
+let SLOTS = { auto:null, s1:null, s2:null, s3:null, s4:null, s5:null, s6:null };
 let S = null;
 let finalTensionTimer = null;
 function newState(){
@@ -390,6 +419,30 @@ const ITEM_DEFS = [
     view(){ return { title:'静 心 茶', html:`<p>一包干茶叶，闻起来有点苦涩。</p><p class="g">【被动】当理智低于 29 时，会自动消耗并恢复 50 点理智。</p><p class="d">（你不需要手动使用它。它会自己救你。）</p>`}; } },
   { flag:'hasCharm', name:'陈默的护身符', desc:'一块红色的布包。理智低于29时自动触发。',
     view(){ return { title:'护 身 符', html:`<p>陈默塞给你的红布包，里面是硬硬的东西。</p><p class="g">【被动】当理智低于 29 时，它会自动燃烧，恢复 70 点理智。</p><p class="d">陈默说：戴着吧。也许用不上。</p><p class="d">她说话的时候，没看你的眼睛。</p>`}; } }
+  ,{ flag:'hasBell', name:'温瑶的铃铛', desc:'温瑶塞给你的。她说戴着会好运。',
+    view(){ return { title:'温 瑶 的 铃 铛', html:`<p>一枚很小的铜铃铛，红绳系着。</p><p class="g">【被动】理智低于 29 时自动触发，恢复 60 点理智。</p><p class="d">你摇了一下。声音很清脆。</p><p class="d">但你总觉得，这声音好像在哪里听过。</p>`}; } }
+  ,{ flag:'hasUmbrella', name:'温瑶的伞', desc:'下雨天她借给你的。',
+    view(){ return { title:'温 瑶 的 伞', html:`<p>一把黑色的折叠伞。伞骨上刻着一个小小的"瑶"字。</p><p class="g">【被动】理智低于 20 时自动触发，恢复 30 点理智。</p><p class="d">奇怪的是，那天她把伞递给你的时候，自己淋着雨走的。</p><p class="d">你回头时，她站的地方，地面是干的。</p>`}; } }
+  ,{ flag:'hasDiary', name:'温瑶的日记', desc:'从图书馆夹层找到的。',
+    view(){ return { title:'温 瑶 的 日 记', html:`<div class="paper"><div class="paper-title">2019 年 · 秋</div><div class="paper-line">9 月 8 日，我在 403 门口站了很久。</div><div class="paper-line">9 月 10 日，陈默让我别靠近这个寝室。</div><div class="paper-line">9 月 12 日，他们说，只要我找到一个愿意替我的人，就能出去了。</div><div class="paper-line hr">9 月 15 日，我找到了。</div><div class="paper-line hr">她叫温瑶。</div><div class="paper-line hr">那是我自己。</div></div><p class="r">最后一页写着：<b>"如果你在读这本日记，那说明——我就是你要找的人。"</b></p>`}; } }
+  ,{ flag:'hasJinmoCard', name:'季默的学生证', desc:'在旧教学楼捡到的。',
+    view(){ return { title:'学 生 证', html:`<div style="border:1px solid #2e2b24;border-radius:2px;padding:16px;background:#141310"><div style="font-size:11px;letter-spacing:.3em;color:#6f6c66;margin-bottom:12px">临 江 大 学</div><div style="font-size:14px;letter-spacing:.15em;color:#c9b48b;margin-bottom:10px">姓名：季 默</div><div style="font-size:13px;color:#a9a49a">院系：计算机学院</div><div style="font-size:13px;color:#a9a49a">寝室：四号宿舍楼　402</div><div style="font-size:13px;color:#a9a49a">入学年份：<span class="r">2019</span></div></div><p style="margin-top:16px">照片上是一个很干净的男生。笑得很浅。</p><p class="d">但他的左眼，是空的。</p><p class="r">学生证背面，用铅笔写了一行字：</p><p class="r">"如果你看到这张证，说明我已经不在了。请把这个交给 403 的女生。"</p>`}; } }
+  ,{ flag:'hasFadedPhoto', name:'褪色的合影', desc:'2019 级 403 寝室合影。',
+    view(){ return { title:'褪 色 的 合 影', html:`<p>一张严重褪色的照片。四张床、四个人。</p><p>但你仔细看，只有三个人的脸是清晰的。</p><p>第四个人的位置，是一片模糊的白。</p><p class="g">白影旁边，有一个男生的轮廓。</p><p class="d">他站在门口，往里看。</p><p class="d">照片背面写着：2019.10.14</p>`}; } }
+  ,{ flag:'hasOldKey', name:'旧档案室钥匙', desc:'李薇从桌肚里翻出来的。',
+    view(){ return { title:'旧 档 案 室 钥 匙', html:`<p>一把生锈的铜钥匙，齿口磨得发亮。</p><p class="g">上面系着一张标签：</p><p class="g">"四号宿舍楼 · 档案室 · 2019"</p><p class="d">你试着转动它。钥匙是温的。</p>`}; } }
+  ,{ flag:'hasCandle', name:'蜡烛', desc:'老校区地下室找到的。',
+    view(){ return { title:'蜡 烛', html:`<p>一根很短的蜡烛，烛芯烧过一半。</p><p class="g">【主动】在黑暗的地方点燃它，可以看到不一样的东西。</p><p class="d">蜡烛的底部，刻着一个字：</p><p class="d">"瑶"。</p>`}; } }
+  ,{ flag:'hasHalfCard2', name:'半张借书卡', desc:'被撕成两半的卡片。',
+    view(){ return { title:'半 张 借 书 卡', html:`<p>借书卡被撕成了两半。你手里这半张，只有年份和一半的名字。</p><p class="r">"2019 年 10 月 14 日 …… 瑶"</p><p class="d">另外半张在谁手里，你不知道。</p>`}; } }
+  ,{ flag:'hasVisitorRule', name:'访客规则残页', desc:'走廊墙上撕下来的。',
+    view(){ return { title:'访 客 规 则 残 页', html:`<div class="paper"><div class="paper-title">访 客 规 则</div><div class="paper-line">一、当你看到两个访客时，只能选一个。</div><div class="paper-line">二、你选的那个，会决定你的路线。</div><div class="paper-line">三、访客说的话，一半真一半假。</div><div class="paper-line">四、如果两个访客同时说话，闭上眼。</div><div class="paper-line">五、你选的访客会保护你，直到你不再需要保护。</div><div class="paper-line hr">六、保护结束的那一刻，就是你要小心的时候。</div><div class="paper-line hr">七、千万不要同时相信两个访客。</div><div class="paper-note">落款处被撕掉了。</div></div><p class="d">你把残页翻过来看。</p><p class="r">背面，有人用铅笔补了一行：</p><p class="r">"他们都是访客。你不是。"</p>`}; } }
+  ,{ flag:'has402Key', name:'男寝 402 钥匙', desc:'季默给你的。',
+    view(){ return { title:'男 寝 402 钥 匙', html:`<p>一把很普通的宿舍钥匙。上面贴了一张小纸条，字迹很轻：</p><p class="g">"如果我不在了，你替我去看看。"</p><p class="g">"看什么？"</p><p class="g">"看我的床还在不在。"</p><p class="d">纸的另一面，写着一个日期：2019.10.14。</p>`}; } }
+  ,{ flag:'hasOldMagazine', name:'2019 年校刊', desc:'旧档案室里找到的。',
+    view(){ return { title:'2019 年 校 刊', html:`<p>校刊第 47 期。目录页折了角，那一页是：</p><p class="r">【新生风采 · 计算机学院 季默】</p><p>配图是一个笑着的男生，站在图书馆门口。</p><p>照片下方写着："希望这四年，能过得慢一点。"</p>`}; } }
+  ,{ flag:'hasChenLetter', name:'陈默的信', desc:'陈默悄悄塞给你的。',
+    view(){ return { title:'陈 默 的 信', html:`<div class="paper"><div class="paper-title">给 你</div><div class="paper-line">如果你读到这里，说明我已经不在了。</div><div class="paper-line">有些事我不能当面说，因为说出来，就会成真。</div><div class="paper-line hr">403 的寝室里，从来没有出现过"第四个"。</div><div class="paper-line hr">出现的，只是"访客"。</div><div class="paper-line">你身边的温瑶，是 2019 级。你身边的季默，也是。</div><div class="paper-line hr">他们不是在保护你。他们是在抢你。</div><div class="paper-line">记住我给你的铜钱。它只有一次机会。</div><div class="paper-line">——陈默</div></div>`}; } }
 ];
 const MANUAL_HTML = `
   <div class="doc-cover"><div class="ct">临 江 大 学</div><div class="cs">新 生 手 册</div><div class="cn">403</div></div>
@@ -514,6 +567,441 @@ function elevPress(n){
    剧情数据
    ═══════════════════════════════════════════════════════════ */
 const STORY = {
+
+/* ============ 温瑶 & 季默 · 双访客线 ============ */
+"v_first":{ch:"校园",title:"图书馆门口 · 一个女生",
+  text:`下午的图书馆门口，很安静。\n\n你正要进去，一个女生从台阶上站起来。\n\n她穿着一条褪色的蓝裙子，头发很长，脸很白。\n\n"你是 403 的吧？"\n\n她没有等你回答，笑了笑：\n\n"我叫温瑶。"\n\n"我在找 403 教室。"\n\n"……可我找不到。"\n\n<span class="d">（你知道 403 是寝室，不是教室。）</span>`,
+  choices:[
+    {t:"告诉她：403 是寝室，不是教室",to:"v_tell"},
+    {t:"先问她：你是哪个班的？",to:"v_ask_class"},
+    {t:"假装没听见，直接走开",to:"v_leave",san:-3}
+  ]},
+"v_tell":{ch:"校园",title:"温瑶",
+  text:`"403 是寝室。"你说。\n\n她愣了一下，然后笑了。\n\n"啊，对。我记错了。"\n\n"我最近老是这样。"\n\n她低头整理了一下裙角。\n\n"谢谢你。"\n\n"对了——"\n\n她抬起头。\n\n"你是新来的吧？"\n\n"我请你吃个饭吧。"\n\n"就当谢谢你。"\n\n<span class="d">（她的语气很自然，像是认识你很久了。）</span>`,
+  choices:[
+    {t:"好，一起去食堂",to:"v_canteen",set:{metWenyao:true}},
+    {t:"不用了，我还有事",to:"v_leave",san:-3,set:{metWenyao:true,wenyaoRejected:true}}
+  ]},
+"v_ask_class":{ch:"校园",title:"温瑶 · 班级",
+  text:`"你是哪个班的？"\n\n她想了想。\n\n"我……"\n\n"记不清了。"\n\n"应该是 2019 级的吧。"\n\n"反正已经很早了。"\n\n她笑了一下。\n\n"你不问也没关系。"\n\n"反正我们以后会经常见的。"\n\n<span class="d">（你没有告诉她你住哪。）</span>`,
+  choices:[
+    {t:"那我们先去吃饭吧",to:"v_canteen",set:{metWenyao:true}},
+    {t:"先走了",to:"v_leave",san:-3,set:{metWenyao:true}}
+  ]},
+"v_canteen":{ch:"校园",title:"食堂 · 和温瑶",
+  text:`你带她进了食堂。\n\n她站在窗口前看了很久，最后点了三样：青菜、土豆丝、白饭。\n\n你们找了个靠窗的位置坐下。\n\n她一直看着你吃。\n\n"你不吃吗？"\n\n"我吃过了。"她说，"我陪你坐着就好。"\n\n她自己没有动筷子。\n\n她的餐盘，从始至终，都是空的。`,
+  choices:[
+    {t:"继续吃，不去想",to:"v_after_canteen"},
+    {t:"问她：真的不吃吗？",to:"v_ask_eat",san:-4},
+    {t:"观察她一会儿",to:"v_observe_wenyao",san:-6}
+  ]},
+"v_ask_eat":{ch:"校园",title:"温瑶 · 不吃饭",
+  text:`"真的不吃吗？"\n\n"不吃。"她说，"我不饿。"\n\n她的目光一直没有离开你。\n\n"你吃东西的样子，很可爱。"\n\n你抬起头。\n\n她的表情很平静。但她的眼神——很暖。\n\n像是看着一个认识了很久的人。\n\n<span class="d">（你确定，你从没跟她吃过饭。）</span>`,
+  choices:[{t:"低下头，继续吃",to:"v_after_canteen",set:{wenyaoAffection:1}}]},
+"v_observe_wenyao":{ch:"校园",title:"观察温瑶",
+  text:`你一边吃饭，一边悄悄观察她。\n\n她坐得很直，手放在膝盖上。\n\n裙子很干净，但很旧。像几十年前那种款式。\n\n她的头发垂下来，遮住一半脸。\n\n你注意到一件事——\n\n她坐在窗边。\n\n阳光从外面照进来。\n\n但她坐的地方，**没有影子**。\n\n<span class="d">（你没有说破。）</span>`,
+  choices:[
+    {t:"装作没看见，继续吃饭",to:"v_after_canteen",san:-5},
+    {t:"问：今天的太阳好大啊",to:"v_sun_trap",san:-6}
+  ]},
+"v_sun_trap":{ch:"校园",title:"温瑶 · 太阳",
+  text:`"今天的太阳好大啊。"\n\n她抬起头，看向窗外。\n\n然后她笑了笑。\n\n"是啊。"\n\n"可惜我坐在里面。"\n\n<span class="d">（她说这句话的时候，嘴角没有动。）</span>`,
+  choices:[{t:"不再说话，吃完离开",to:"v_after_canteen",san:-5,set:{wenyaoSuspicion:1}}]},
+"v_after_canteen":{ch:"校园",title:"食堂门口 · 分别",
+  text:`你们一起走出食堂。\n\n她停下来。\n\n"谢谢你陪我吃饭。"\n\n她从口袋里摸出一枚小小的铜铃铛，递给你。\n\n"这个给你。"\n\n"戴着吧。"\n\n"会好运的。"\n\n<span class="d">（铃铛已经放进背包了。理智低于 29 时，它会自动响。）</span>`,
+  choices:[
+    {t:"收下铃铛，道谢",to:"d_morning",set:{hasBell:true,metWenyao:true,wenyaoAffection:1}},
+    {t:"不用了，我不习惯戴东西",to:"d_morning",san:-3,set:{metWenyao:true}}
+  ]},
+"v_leave":{ch:"校园",title:"离开",
+  text:`你转身走了。\n\n她没有叫你。\n\n你走出一段距离，回头看了一眼。\n\n她还站在原地，看着你。\n\n目光很平静。\n\n像是在确认什么。\n\n<span class="d">（你收紧了书包带。）</span>`,
+  choices:[{t:"快步回寝室",to:"d_morning",set:{metWenyao:true}}]},
+
+/* ============ 季默 · 男寝来的男生 ============ */
+"j_first":{ch:"校园",title:"四号楼门口 · 一个男生",
+  text:`你回寝室的路上，路过四号楼门口。\n\n一个男生站在花坛边，看着 403 的方向。\n\n他穿着很旧的校服，头发有点长。\n\n他嘴里在念着什么。\n\n你走近一点，听见他在数数。\n\n"一、二、三……"\n\n"四。"\n\n然后他停下来，重新开始。\n\n"一、二、三……四。"\n\n<span class="d">（他一直在数。）</span>`,
+  choices:[
+    {t:"走过去，问他是不是迷路了",to:"j_ask"},
+    {t:"装作没看见，进楼",to:"d_door",san:-3,set:{sawJinmo:true}}
+  ]},
+"j_ask":{ch:"校园",title:"季默",
+  text:`"同学，你迷路了吗？"\n\n他抬起头。\n\n他的脸很白，眼睛很深。\n\n"不。"\n\n"我在等人。"\n\n"等谁？"\n\n"等 403 的那个。"\n\n"哪个？"\n\n他歪了歪头。\n\n"你。"\n\n<span class="d">（他说得很平静，像在陈述事实。）</span>`,
+  choices:[
+    {t:"问他：你是谁？",to:"j_name",san:-5},
+    {t:"转身就走",to:"d_door",san:-4,set:{sawJinmo:true}}
+  ]},
+"j_name":{ch:"校园",title:"季默 · 名字",
+  text:`"你是谁？"\n\n他沉默了很久。\n\n"季默。"\n\n"计算机学院。"\n\n"男寝 402。"\n\n"2019 级。"\n\n他说完，又摇了摇头。\n\n"不对。"\n\n"我今年大四。"\n\n"可我一直在这儿。"\n\n"我不知道多少年了。"\n\n<span class="d">（他说话的时候，声音在抖。）</span>`,
+  choices:[
+    {t:"问他：你还好吗？",to:"j_warn",san:-4},
+    {t:"转身就走",to:"d_door",san:-6,set:{sawJinmo:true}}
+  ]},
+"j_warn":{ch:"校园",title:"季默 · 警告",
+  text:`"你还好吗？"\n\n他忽然抓住你的手臂。\n\n他的手很凉。凉得像冰块。\n\n"小心温瑶。"\n\n"什么？"\n\n"小心温瑶。"\n\n"她会让你签名的。"\n\n"签了，你就是下一个。"\n\n然后他松开手，往后退了一步。\n\n"对不起。"\n\n"对不起，我又这样了。"\n\n"你走吧。"\n\n"我走了。"\n\n他转身，走进男寝楼。\n\n<span class="d">（你低头看自己的手臂——他抓过的地方，起了一层细霜。）</span>`,
+  choices:[
+    {t:"把这件事记在心里",to:"d_door",san:-5,set:{sawJinmo:true,metJinmo:true}},
+    {t:"追上去问清楚",to:"j_chase",san:-8,set:{sawJinmo:true,metJinmo:true}}
+  ]},
+"j_chase":{ch:"校园",title:"追季默",
+  text:`你追上去。\n\n男寝楼门口很黑。\n\n你站在外面，往里看。\n\n走廊很长。\n\n尽头有一扇门。\n\n门上写着：<span class="r">402</span>。\n\n门缝里透出很淡的光。\n\n你听见里面有人在数数。\n\n"一、二、三……四。"\n\n"一、二、三……四。"\n\n"一、二、三……"\n\n<span class="d">（你没敢进去。）</span>`,
+  choices:[
+    {t:"回女寝",to:"d_door",san:-10,set:{saw402:true}},
+    {t:"敲门",to:"j_knock",san:-15,set:{saw402:true}}
+  ]},
+"j_knock":{ch:"校园",title:"402 门口",
+  text:`你敲了敲门。\n\n数数的声音停了。\n\n门开了一条缝。\n\n季默站在门后，看着你。\n\n他的眼睛很红。\n\n"你来了。"\n\n"我……"\n\n"你来了。"\n\n"太好了。"\n\n他笑了笑，把门完全打开。\n\n"进来吧。"\n\n"我们等了很久了。"\n\n你往门里看。\n\n里面没有床。没有桌子。\n\n只有一排排的椅子，坐满了人。\n\n所有人都低着头。\n\n所有人在数数。\n\n"一、二、三……四。"\n\n<span class="d">（你猛地后退。）</span>`,
+  choices:[
+    {t:"转身就跑",to:"j_run_away",san:-20},
+    {t:"站在门口，不敢动",to:"e_dark",san:-30,danger:true}
+  ]},
+"j_run_away":{ch:"校园",title:"逃回女寝",
+  text:`你转身就跑。\n\n走廊里的数数声一直跟着你。\n\n"一、二、三……四。"\n\n"一、二、三……四。"\n\n你冲进女寝楼，反手把门摔上。\n\n数数声停了。\n\n你靠在门上，喘着气。\n\n门玻璃上，映出你的脸。\n\n你的脸旁边，多了一张脸。\n\n季默的脸。\n\n<span class="d">（你转身。走廊里空无一人。）</span>`,
+  choices:[{t:"走回 403",to:"d_door",san:-10,set:{metJinmo:true,saw402Room:true}}]},
+
+/* ============ 舍友带路 · 遇袭线 ============ */
+"s_plan":{ch:"隐藏",title:"苏也的提议",
+  text:`晚上，苏也把你们叫到一起。\n\n"我有个想法。"\n\n"旧教学楼那边，有一间档案室。"\n\n"里面藏着 2019 级的旧档案。"\n\n"如果我们能查到当年那届的名单——"\n\n她顿了顿。\n\n"也许就知道，403 的第四个是谁了。"\n\n李薇推了推眼镜：\n\n"现在去？"\n\n"现在。"苏也说，"白天人多。"\n\n"晚上才好。"\n\n<span class="d">（你已经知道 2019 级的"第四个"是谁了。）</span>`,
+  choices:[
+    {t:"好，一起去",to:"s_go",san:-5},
+    {t:"不去，太危险了",to:"d_back_dorm",san:-3},
+    {t:"先问问陈默",to:"s_ask_chen"}
+  ]},
+"s_ask_chen":{ch:"隐藏",title:"陈默的意见",
+  text:`你去问陈默。\n\n她正在擦那双旧布鞋。\n\n"旧教学楼？"\n\n她抬起头。\n\n"别去。"\n\n"为什么？"\n\n"因为那里……"\n\n她停住了。\n\n"有东西在等。"\n\n"等什么？"\n\n"等一个愿意进去的人。"\n\n"进去了，就会变成它的一部分。"\n\n"像 2019 年那届一样。"\n\n她把布鞋放下。\n\n"你要去，我不拦你。"\n\n"但带上这个。"\n\n她从枕头下摸出一把旧钥匙，递给你。\n\n<span class="d">（旧档案室钥匙已经放进背包。）</span>`,
+  choices:[
+    {t:"收下钥匙，还是决定去",to:"s_go",san:-8,set:{hasOldKey:true,chenTrust:4}},
+    {t:"听陈默的，不去",to:"d_back_dorm",san:-3,set:{hasOldKey:true}}
+  ]},
+"s_go":{ch:"隐藏",title:"旧教学楼 · 出发",
+  text:`你、苏也、李薇三个人，往旧教学楼走。\n\n夜里的校园很安静。\n\n只有路灯，和偶尔掠过的风。\n\n旧教学楼在大校区最北边，和那座"老校区"隔着一条暗巷。\n\n楼门是开的。\n\n门轴发出很轻的声音。\n\n苏也走在最前面。\n\n李薇在中间。\n\n你在最后。\n\n"别怕。"苏也回头笑了笑，"就我们三个人。"\n\n<span class="d">（可你总觉得，身后有第四个人的脚步。）</span>`,
+  choices:[
+    {t:"跟着进去",to:"s_corridor"},
+    {t:"回头看看有没有人",to:"s_look_back",san:-5}
+  ]},
+"s_look_back":{ch:"隐藏",title:"回头",
+  text:`你回头。\n\n身后是空的。\n\n没有人。\n\n你正要转回去——\n\n楼门口的台阶上，多了一个影子。\n\n一个男生的影子。\n\n他没有动。\n\n只是站着。\n\n<span class="d">（你忽然想起那句警告："小心温瑶"。）</span>`,
+  choices:[{t:"转回去，跟上她们",to:"s_corridor",san:-5,set:{sawShadow:true}}]},
+"s_corridor":{ch:"隐藏",title:"旧教学楼 · 走廊",
+  text:`走廊很暗。\n\n声控灯没反应。\n\n苏也打开手机手电筒，光柱在黑暗里晃。\n\n"档案室在四楼。"她说，"我们走楼梯上去。"\n\n你们一层一层往上走。\n\n走到三楼和四楼之间的时候，你听见了声音。\n\n很轻的脚步声。\n\n从上面下来的。\n\n<span class="d">（你抬头看，楼梯上方一片黑。）</span>`,
+  choices:[
+    {t:"提醒她们小心",to:"s_talk",san:-5},
+    {t:"继续往上走",to:"s_find",san:-6}
+  ]},
+"s_talk":{ch:"隐藏",title:"苏也的坦白",
+  text:`"苏也。"你压低声音，"小心点。"\n\n她回过头。\n\n"怎么了？"\n\n"上面有脚步声。"\n\n她停下来，听了一会儿。\n\n"……没有啊。"\n\n"有的。"你说，"从上面下来的。"\n\n她沉默了几秒。\n\n"你知道吗？"\n\n"我大一的时候，也听过。"\n\n"那时候，我以为是自己听错了。"\n\n"后来——"\n\n她笑了笑。\n\n"后来我成了 403 的苏也。"\n\n"就这样。"\n\n<span class="d">（她转回去，继续往上走。）</span>`,
+  choices:[{t:"跟上她",to:"s_find",san:-4,set:{suyeStory:true}}]},
+"s_find":{ch:"隐藏",title:"四楼 · 档案室",
+  text:`你们到了四楼。\n\n走廊尽头，有一扇门。\n\n门上写着：<span class="r">档案室</span>。\n\n锁着。\n\n苏也推了推。\n\n"打不开。"\n\n李薇从包里掏出一把旧钥匙。\n\n"我试试。"\n\n她把钥匙插进锁孔。\n\n转了一下。\n\n"咔哒。"\n\n门开了。\n\n<span class="d">（门后面很黑。）</span>`,
+  choices:[
+    {t:"一起进去",to:"s_open"},
+    {t:"让苏也先进",to:"s_open",san:-2}
+  ]},
+"s_open":{ch:"隐藏",title:"档案室 · 开门",
+  text:`门开了。\n\n里面很黑。\n\n苏也走进去，手电筒照着四周。\n\n一排排铁皮柜，上面贴着手写的标签。\n\n"2019 级……"\n\n她拉开一个柜子。\n\n里面全是档案。\n\n你们开始翻。\n\n翻到一半的时候——\n\n灯灭了。\n\n手电筒也灭了。\n\n走廊里传来"砰"的一声。\n\n门被关上了。\n\n<span class="d">（黑暗中，你听见两个人的呼吸声。）</span>`,
+  choices:[{t:"点亮手机屏幕",to:"s_ambush",san:-8}]},
+"s_ambush":{ch:"隐藏",title:"突然的袭击",
+  text:`你点亮手机屏幕。\n\n微光里，你看见了苏也。\n\n她站在你面前，脸色发白。\n\n"李薇呢？"\n\n你转头。\n\n李薇站在门口。\n\n她身后——\n\n站着一个男生。\n\n季默。\n\n他低着头，一动不动。\n\n然后他抬起头。\n\n对你笑了笑。\n\n"终于。"\n\n"终于找到你了。"\n\n他冲向你们。`,
+  choices:[{t:"⚡ 【躲 避】",act:"dodge",to:"s_dodge_result",dodgeCount:3,dodgeNext:"s_after_dodge"}]},
+"s_dodge_result":{ch:"隐藏",title:"躲避 · 结果",text:`（结算中）`,choices:[]},
+"s_after_dodge":{ch:"隐藏",title:"躲避 · 之后",text:`（自动跳转）`,choices:[]},
+"s_safe":{ch:"隐藏",title:"完美躲过",
+  text:`你连着躲了三次。\n\n季默扑了个空，撞在墙上。\n\n他的身体发出"沙"的声音。\n\n像是一堆纸被撞散了。\n\n然后他消失了。\n\n地板上，留下一张旧学生证。\n\n苏也喘着气，扶着墙。\n\n"那是……那是什么？"\n\n"我不知道。"你说。\n\n你捡起那张学生证。\n\n<span class="d">（季默的学生证已经放进背包。）</span>`,
+  choices:[
+    {t:"捡起学生证，带苏也离开",to:"s_escape",set:{hasJinmoCard:true,survivedAmbush:true}},
+    {t:"先看一眼学生证",to:"s_card_look",set:{hasJinmoCard:true,survivedAmbush:true}}
+  ]},
+"s_card_look":{ch:"隐藏",title:"学生证",
+  text:`你把学生证翻开。\n\n"季默 · 计算机学院 · 男寝 402 · 2019 级"。\n\n照片上是一个很干净的男生。\n\n笑得很浅。\n\n但照片上，他的左眼是空的。\n\n"你认识他？"苏也问。\n\n"不认识。"\n\n"可他刚才说——"\n\n"他终于找到你了。"\n\n苏也沉默了一会儿。\n\n"那他找的，是你吗？"\n\n<span class="d">（你没有回答。）</span>`,
+  choices:[{t:"收好学生证，离开",to:"s_escape"}]},
+"s_hit":{ch:"隐藏",title:"受伤",
+  text:`你躲晚了。\n\n季默的手抓住你的肩膀。\n\n他的手很凉。\n\n凉得像从冰水里捞出来的。\n\n你感觉理智在快速流失。\n\n眼前一片黑。\n\n苏也冲过来，把季默推开。\n\n"跑！"她喊。\n\n你们一起冲出档案室。`,
+  choices:[{t:"跟着苏也跑",to:"s_escape",san:-30,set:{wounded:true}}]},
+"s_su_hurt":{ch:"隐藏",title:"苏也受伤",
+  text:`季默的手穿过了你的肩膀。\n\n苏也扑过来，用身体挡住你。\n\n季默的手，划破了她的手臂。\n\n血顺着她的手臂往下流。\n\n但她没有退。\n\n"跑！"\n\n她推着你往外跑。\n\n李薇拉着你们，三个人冲出档案室。\n\n季默没有追出来。\n\n走廊尽头，他的声音很远：\n\n"你躲不掉的。"\n\n"你最终，还是会签。"`,
+  choices:[{t:"扶着苏也离开",to:"s_escape",san:-35,set:{suyeHurt:true,wounded:true}}]},
+"s_escape":{ch:"隐藏",title:"逃出旧教学楼",
+  text:`你们三个人冲出旧教学楼。\n\n外面下着小雨。\n\n苏也靠在墙上喘气。\n\n李薇抖得很厉害。\n\n你回头看。\n\n旧教学楼的四楼，窗户里，站着一个男生。\n\n他在看你。\n\n<span class="d">（然后他消失了。）</span>`,
+  choices:[{t:"回寝室",to:"s_back_dorm"}]},
+"s_back_dorm":{ch:"隐藏",title:"回到 403",
+  text:`你们回到寝室。\n\n陈默坐在床上，看着你们。\n\n"去了？"\n\n"去了。"\n\n"看到了？"\n\n"看到了。"\n\n陈默点点头。\n\n"那你们应该知道了。"\n\n"你们不是唯一的。"\n\n"还有很多 403 的人，还在走。"\n\n"他们有的成了书。"\n\n"有的成了菜。"\n\n"有的成了规则。"\n\n"有的——"\n\n"成了访客。"\n\n<span class="d">（她看向苏也。苏也低着头。）</span>`,
+  choices:[
+    {t:"问：访客是什么？",to:"s_visitor_explain",san:-5},
+    {t:"先休息",to:"d_back_dorm"}
+  ]},
+"s_visitor_explain":{ch:"隐藏",title:"访客",
+  text:`"访客是什么？"\n\n陈默站起来，走到门后。\n\n她指着门后那张泛黄的规则。\n\n"你注意看。"\n\n"403 寝室规则。"\n\n"你数一数，有几条。"\n\n你数了一遍。\n\n七条。\n\n"不对。"陈默说。\n\n"你数第七行。"\n\n你再看。\n\n第七条被涂掉了。\n\n"这才是第七条。"她说。\n\n"但访客规则——"\n\n"访客规则是另一张纸。"\n\n"贴在走廊尽头。"\n\n"那上面写着——"\n\n"保护结束的那一刻，"\n\n"就是你该小心的时候。"\n\n<span class="d">（你忽然明白了什么。）</span>`,
+  choices:[
+    {t:"去走廊尽头看看",to:"s_corridor_rule",san:-6},
+    {t:"先休息",to:"d_back_dorm"}
+  ]},
+"s_corridor_rule":{ch:"隐藏",title:"走廊尽头 · 一张纸",
+  text:`你走到走廊尽头。\n\n墙上贴着一张纸。\n\n上面写着七条规则。\n\n<span class="r">【访客规则】</span>\n\n一、当你看到两个访客时，只能选一个。\n\n二、你选的那个，会决定你的路线。\n\n三、访客说的话，一半真一半假。\n\n四、如果两个访客同时说话，闭上眼。\n\n五、你选的访客会保护你，直到你不再需要保护。\n\n六、保护结束的那一刻，就是你要小心的时候。\n\n七、千万不要同时相信两个访客。\n\n你正要撕下来。\n\n身后，有人说话。\n\n"你也看到了。"\n\n你回头。\n\n温瑶站在走廊的另一端。\n\n她没有笑。\n\n<span class="d">（她看着你的眼睛，很认真。）</span>`,
+  choices:[
+    {t:"问她：你是访客吗？",to:"v_final_ask",san:-8},
+    {t:"不理她，转身就走",to:"d_back_dorm",san:-6}
+  ]},
+
+/* ============ 温瑶 · 真相 & 最终选择 ============ */
+"v_final_ask":{ch:"隐藏",title:"温瑶 · 坦白",
+  text:`"你是访客吗？"\n\n她沉默了很久。\n\n"是。"\n\n"2019 级的。"\n\n"我死在这里的时候，还很年轻。"\n\n"他们告诉我，只要找到一个愿意替我的人，我就能走。"\n\n"所以我一直在找。"\n\n"找了六年。"\n\n"你是第一个，我会犹豫的。"\n\n<span class="d">（她没有走近你。）</span>`,
+  choices:[
+    {t:"问她：你会让我签名吗？",to:"v_sign_question",san:-6},
+    {t:"问她：季默呢？",to:"v_jinmo_question",san:-8}
+  ]},
+"v_sign_question":{ch:"隐藏",title:"温瑶 · 签名",
+  text:`"你会让我签名吗？"\n\n她抬起头，看着你。\n\n"会。"\n\n"但不是现在。"\n\n"为什么？"\n\n"因为现在我还不想。"\n\n"等你真正需要我的时候——"\n\n"我会的。"\n\n"就像别人对我那样。"\n\n<span class="d">（她的语气很平静。）</span>`,
+  choices:[{t:"沉默",to:"v_final_choice",san:-5}]},
+"v_jinmo_question":{ch:"隐藏",title:"温瑶 · 季默",
+  text:`"季默呢？"\n\n她愣了一下。\n\n"他？"\n\n"他不该出现的。"\n\n"为什么？"\n\n"因为他和我，是同一年的。"\n\n"那一年，403 住了四个人。"\n\n"我是第四个。"\n\n"他是隔壁 402 的。"\n\n"他那天来找我。"\n\n"然后就再也没出去。"\n\n"他现在——"\n\n她顿了顿。\n\n"他现在，和我一样。"\n\n"我们都在等。"\n\n<span class="d">（你终于明白，季默抓你手臂的时候，为什么那么凉。）</span>`,
+  choices:[{t:"明白了",to:"v_final_choice",san:-8}]},
+"v_final_choice":{ch:"隐藏",title:"最 终 的 选 择",
+  text:`走廊很长。\n\n温瑶站在左端。\n\n季默站在右端。\n\n两个人都没有说话。\n\n头顶的灯，一盏一盏地灭了。\n\n从你的位置，向两边扩散。\n\n<span class="r">你必须在他们之间，选一个。</span>`,
+  choices:[
+    {t:"走向温瑶",to:"f_to_wenyao",san:-5},
+    {t:"走向季默",to:"f_to_jinmo",san:-5},
+    {t:"站着不动",to:"f_stay",san:-10}
+  ]},
+"f_to_wenyao":{ch:"隐藏",title:"走向温瑶",
+  text:`你朝温瑶走过去。\n\n季默立刻动了。\n\n他冲向你。\n\n温瑶挡在你面前。\n\n她抬起手，抓住季默的手腕。\n\n她的手很凉，但很有力。\n\n季默退了两步。\n\n他看着温瑶，笑了一下。\n\n"你护得了他一次。"\n\n"护得了他一辈子吗？"\n\n然后他消失了。\n\n温瑶转身看着你。\n\n她的手臂在抖。\n\n"你没事吧？"\n\n<span class="d">（你第一次看见她露出担心的表情。）</span>`,
+  choices:[
+    {t:"扶住她",to:"v_protect_1",set:{wenyaoProtected:true,choseWenyao:true}},
+    {t:"问她：你为什么要救我？",to:"v_protect_ask",san:-5,set:{choseWenyao:true}}
+  ]},
+"v_protect_ask":{ch:"隐藏",title:"温瑶 · 为什么",
+  text:`"你为什么要救我？"\n\n她愣了一下。\n\n然后她低下头。\n\n"我不知道。"\n\n"大概是因为——"\n\n"你笑起来的样子，很像一个人。"\n\n"谁？"\n\n"我自己。"\n\n"六年前的我。"\n\n<span class="d">（她说完，转过身。）</span>`,
+  choices:[{t:"沉默，跟着她走",to:"v_protect_1",set:{wenyaoProtected:true,choseWenyao:true}}]},
+"v_protect_1":{ch:"隐藏",title:"温瑶 · 保护期",
+  text:`接下来的几天，温瑶总是出现在你身边。\n\n她帮你占座位。\n\n她递给你水。\n\n她记得你随口说过的小事。\n\n她提醒你别熬夜。\n\n你说话的时候，她会安静地看着你。\n\n<span class="d">（她从不说喜欢。但所有人都看得出来。）</span>`,
+  choices:[
+    {t:"继续接受她的保护",to:"v_protect_2",san:10},
+    {t:"开始保持距离",to:"v_protect_2",san:-5}
+  ]},
+"v_protect_2":{ch:"隐藏",title:"温瑶 · 下雨天",
+  text:`有一天，下雨了。\n\n她递给你一把伞。\n\n"拿着。"\n\n"你自己呢？"\n\n"我不用。"\n\n她笑了笑，自己走进雨里。\n\n你撑着伞，站在原地。\n\n你看着她走远。\n\n<span class="r">她走过的地面上，没有雨点。</span>\n\n<span class="d">（伞已经放进背包了。）</span>`,
+  choices:[
+    {t:"跟上去",to:"v_rain_follow",set:{hasUmbrella:true,wenyaoAffection:2}},
+    {t:"回寝室",to:"v_protect_3",set:{hasUmbrella:true}}
+  ]},
+"v_rain_follow":{ch:"隐藏",title:"雨中",
+  text:`你跟了上去。\n\n她没有回头。\n\n但她的脚步，慢了下来。\n\n走到走廊尽头，她停下来。\n\n"你不要跟着我。"\n\n"为什么？"\n\n"因为——"\n\n"我怕你会看到一些不该看的东西。"\n\n她转过身。\n\n她的眼睛里，有一种很深的悲伤。\n\n"你回去吧。"\n\n"等哪天我不在了，你自然就知道了。"\n\n<span class="d">（她的身影，在雨里慢慢淡了。）</span>`,
+  choices:[{t:"回寝室",to:"v_protect_3",san:-5,set:{wenyaoAffection:3}}]},
+"v_protect_3":{ch:"隐藏",title:"温瑶 · 便条",
+  text:`第二天，你在书包里发现一张便条。\n\n<span class="g">"今天你没吃早饭。"</span>\n\n<span class="g">"下午三点，图书馆门口等你。"</span>\n\n<span class="g">"给你带了点吃的。"</span>\n\n<span class="g">"——温瑶"</span>\n\n<span class="d">（便条已经放进背包。理智低于 20 时会自动消耗。）</span>`,
+  choices:[
+    {t:"按时赴约",to:"v_meet_again",san:5,set:{hasNote:true,wenyaoAffection:4}},
+    {t:"不去",to:"v_protect_4",san:-4,set:{hasNote:true}}
+  ]},
+"v_meet_again":{ch:"隐藏",title:"赴约",
+  text:`下午三点，图书馆门口。\n\n她坐在台阶上，手里拎着一个纸袋。\n\n"你来了。"\n\n她站起来，把纸袋递给你。\n\n"热的。"\n\n"还烫着。"\n\n你接过来。\n\n纸袋确实很烫。\n\n但她的手——更烫。\n\n<span class="d">（她握过的地方，纸袋上的水汽都干了。）</span>`,
+  choices:[{t:"谢谢她",to:"v_protect_4",san:5}]},
+"v_protect_4":{ch:"隐藏",title:"温瑶 · 保护结束",
+  text:`又过了几天。\n\n那天晚上，你站在阳台上。\n\n楼下的花坛边，站着温瑶。\n\n她抬起头，对你笑了笑。\n\n然后她开口。\n\n"你已经不需要我保护了。"\n\n"为什么？"\n\n"因为真正的危险，不在外面。"\n\n"在哪里？"\n\n她指了指你自己。\n\n"在这里。"\n\n"你心里，已经有答案了。"\n\n"你现在缺的，只是签字。"\n\n<span class="r">（她手里，多出了一本深红色的册子。）</span>`,
+  choices:[
+    {t:"下楼，和她面对面",to:"w_final_ask",san:-5},
+    {t:"不下楼，躲在房间里",to:"v_hide",san:-8}
+  ]},
+"v_hide":{ch:"隐藏",title:"躲",
+  text:`你没有下楼。\n\n你躲在房间里。\n\n外面很安静。\n\n过了一整夜。\n\n第二天早上，你从窗户往下看。\n\n花坛边，已经没有她的身影。\n\n只有一朵小小的白花。\n\n<span class="d">（她走了。）</span>`,
+  choices:[
+    {t:"下楼捡起白花",to:"w_final_ask",set:{hasFlower:true,wenyaoLeft:true}},
+    {t:"不去管它",to:"d_back_dorm",set:{wenyaoLeft:true}}
+  ]},
+
+/* ============ 温瑶 · 背刺线 ============ */
+"w_final_ask":{ch:"隐藏",title:"温瑶 · 最后的请求",
+  text:`你下楼了。\n\n她站在花坛边，手里拿着册子。\n\n"帮我个忙好吗？"\n\n"什么忙？"\n\n"在这里签个名。"\n\n"就当纪念。"\n\n她翻开册子最后一页。\n\n空白。\n\n但空白纸上，有一个很浅很浅的凹痕。\n\n像是有人曾在那里，用力写过字。\n\n"签吧。"\n\n"我保证，签完就没事了。"\n\n<span class="d">（她的表情很平静。）</span>`,
+  choices:[
+    {t:"签下自己的名字",to:"w_signed",san:-10},
+    {t:"拒绝",to:"w_refuse",san:-5},
+    {t:"拖延：让我再想想",to:"w_delay",san:-3}
+  ]},
+"w_signed":{ch:"隐藏",title:"签名",
+  text:`你接过笔。\n\n笔很凉。\n\n笔尖落在纸上。\n\n你写下自己的名字。\n\n写完的一瞬间——\n\n温瑶笑了。\n\n但那不是之前的笑。\n\n<span class="r">那是一个很陌生、很冷、很饿的笑。</span>\n\n"谢谢你。"\n\n"谢谢你替我。"\n\n"我走了。"\n\n她转身，走向花坛深处。\n\n她的身影在月光里越来越淡。\n\n而你的名字，从你身上慢慢脱落。\n\n一点点地，飘向那本册子。\n\n<span class="d">（你终于明白，她一直在等这一刻。）</span>`,
+  choices:[{t:"……",to:"e_betrayed",danger:true}]},
+"w_refuse":{ch:"隐藏",title:"拒绝",
+  text:`"我不签。"\n\n她愣了一下。\n\n然后她收起了笑。\n\n"为什么？"\n\n"因为我知道这是什么。"\n\n"你知道？"\n\n"我知道。"\n\n她沉默了很久。\n\n然后她抬起头。\n\n"那你就没用了。"\n\n<span class="r">她向你走来。</span>`,
+  choices:[{t:"后退",to:"w_fight",san:-10}]},
+"w_delay":{ch:"隐藏",title:"拖延",
+  text:`"让我再想想。"\n\n她笑了笑。\n\n"好。"\n\n"你想多久都行。"\n\n"我有的是时间。"\n\n她转身走了。\n\n<span class="d">（但你注意到，她走的时候，手里还拿着那本册子。）</span>`,
+  choices:[{t:"回寝室",to:"d_back_dorm",san:-5,set:{wenyaoDelayed:true}}]},
+"w_fight":{ch:"隐藏",title:"温瑶 · 现形",
+  text:`她向你走来。\n\n每走一步，她身上的光就淡一分。\n\n走到一半，她已经不是那个温瑶了。\n\n她的裙子变成了灰色。\n\n她的脸上，没有五官。\n\n只有一张很薄很薄的纸。\n\n<span class="r">她是一张纸。</span>\n\n一张写满了名字的纸。\n\n<span class="d">（你胸口的铃铛，开始发烫。）</span>`,
+  choices:[
+    {t:"摇铃铛",to:"w_bell",need:(S)=>S.flags.hasBell,lockHint:"需要温瑶的铃铛"},
+    {t:"转身跑",to:"w_run",san:-15},
+    {t:"站在原地",to:"e_become_her",san:-30,danger:true}
+  ]},
+"w_bell":{ch:"隐藏",title:"铃铛",
+  text:`你摇响了铃铛。\n\n"叮——"\n\n她停住了。\n\n她退后半步。\n\n然后她的五官，慢慢回来了。\n\n她看着你。\n\n"你还有铃铛。"\n\n"是啊。"\n\n"……"\n\n她低下头。\n\n"走吧。"\n\n"趁我还能控制自己。"\n\n"走得越远越好。"\n\n<span class="d">（她转身，走进花坛深处。）</span>`,
+  choices:[
+    {t:"追上去",to:"w_counter",san:-8},
+    {t:"转身跑",to:"w_run",san:-5}
+  ]},
+"w_run":{ch:"隐藏",title:"跑",
+  text:`你转身就跑。\n\n身后没有脚步声。\n\n你跑回女寝楼，冲进 403。\n\n关上门，反锁。\n\n门外很安静。\n\n你看着门玻璃。\n\n玻璃上，映出你的脸。\n\n你的脸旁边，多了一个模糊的影子。\n\n她张了张嘴。\n\n你没有听见声音。\n\n但你读出了她的口型：\n\n<span class="r">"我还会来找你的。"</span>`,
+  choices:[
+    {t:"等天亮",to:"d_back_dorm",san:-10,set:{wenyaoEscaped:true}},
+    {t:"去找陈默",to:"w_find_chen",san:-6,set:{wenyaoEscaped:true}}
+  ]},
+"w_find_chen":{ch:"隐藏",title:"找陈默",
+  text:`你冲到陈默的床前。\n\n"陈默！"\n\n她抬起头。\n\n"你见到了？"\n\n"见到了。"\n\n"她还活着吗？"\n\n"什么？"\n\n"她还——能说话吗？"\n\n"能。"\n\n"那她还有救。"\n\n陈默站起来，从抽屉里摸出一本旧日记。\n\n"这是她的。"\n\n"2019 年，她留在这里的。"\n\n"你看完，就知道怎么救她了。"\n\n<span class="d">（温瑶的日记已经放进背包。）</span>`,
+  choices:[
+    {t:"翻开日记",to:"w_read_diary",set:{hasDiary:true}},
+    {t:"先收起来，明天再看",to:"d_back_dorm",set:{hasDiary:true}}
+  ]},
+"w_read_diary":{ch:"隐藏",title:"温瑶的日记",
+  text:`你翻开日记。\n\n第一页：\n\n"9 月 8 日。今天报到。"\n\n"403 寝室看起来很奇怪。苏也、李薇、陈默……"\n\n"还有一个位置，是空的。"\n\n第二页：\n\n"9 月 12 日。我发现那个空床位，是属于我的。"\n\n"我很高兴。"\n\n第三页：\n\n"9 月 15 日。我做了一个梦。"\n\n"梦里有人告诉我，只要我找到一个愿意替我的人，就能出去。"\n\n"我拒绝了。"\n\n最后一页：\n\n<span class="r">"10 月 14 日。我签了。"</span>\n\n<span class="r">"签给了我自己。"</span>\n\n<span class="r">"我成了那个'第四个'。"</span>\n\n<span class="r">"现在，轮到我了。"</span>`,
+  choices:[
+    {t:"合上日记",to:"w_diary_after",san:-8,set:{hasDiary:true}},
+    {t:"翻到最后一页背面",to:"w_diary_back",san:-10,set:{hasDiary:true}}
+  ]},
+"w_diary_back":{ch:"隐藏",title:"日记 · 背面",
+  text:`你把日记翻到最后一页的背面。\n\n上面有一行铅笔字。\n\n很淡，像是随时会消失。\n\n<span class="g">"如果你在读这本日记——"</span>\n\n<span class="g">"说明你已经认识我了。"</span>\n\n<span class="g">"也说明，我不在人世了。"</span>\n\n<span class="g">"请你不要恨我。"</span>\n\n<span class="g">"我只是想回家。"</span>\n\n<span class="d">（你把日记合上。）</span>`,
+  choices:[{t:"收好日记，去做决定",to:"w_counter_pre",san:-5}]},
+"w_diary_after":{ch:"隐藏",title:"日记 · 合上",
+  text:`你合上日记。\n\n心里很乱。\n\n她不是纯粹的坏人。\n\n但她确实想让你替她。\n\n<span class="d">（你必须做出决定。）</span>`,
+  choices:[{t:"去找到她",to:"w_counter_pre",san:-5}]},
+"w_counter_pre":{ch:"隐藏",title:"温瑶 · 反杀准备",
+  text:`你走出寝室。\n\n走廊里很安静。\n\n你走到走廊尽头，站在访客规则那张纸前。\n\n规则第五条：\n\n<span class="r">"你选的访客会保护你，直到你不再需要保护。"</span>\n\n第六条：\n\n<span class="r">"保护结束的那一刻，就是你要小心的时候。"</span>\n\n你终于明白了。\n\n<span class="d">（你需要在她再次出现时，做出正确的选择。）</span>`,
+  choices:[
+    {t:"等她出现",to:"w_counter",san:-5},
+    {t:"摇响铃铛",to:"w_bell_call",need:(S)=>S.flags.hasBell,lockHint:"需要温瑶的铃铛"}
+  ]},
+"w_bell_call":{ch:"隐藏",title:"铃铛 · 召唤",
+  text:`你摇响了铃铛。\n\n"叮——"\n\n"叮——"\n\n"叮——"\n\n铃声响了三下。\n\n走廊尽头，出现了一个模糊的身影。\n\n是温瑶。\n\n她站在光里。\n\n"你叫我？"\n\n"是。"\n\n"你想好了？"\n\n"想好了。"`,
+  choices:[{t:"开始反杀",to:"w_counter",san:-5}]},
+"w_counter":{ch:"隐藏",title:"温瑶 · 反杀",
+  text:`你看着她的眼睛。\n\n"我不会签的。"\n\n她笑了。\n\n"不签也可以。"\n\n"那我就自己动手。"\n\n她抬手。\n\n走廊的灯，一盏一盏地灭了。\n\n你从口袋里摸出那本日记。\n\n<span class="r">"这是你的。"</span>\n\n<span class="r">"还给你。"</span>\n\n她愣住了。\n\n<span class="d">（日记发出微光。）</span>`,
+  choices:[
+    {t:"念出日记最后一行",to:"w_counter_2",san:-5,need:(S)=>S.flags.hasDiary,lockHint:"需要温瑶的日记"},
+    {t:"把日记扔向她",to:"w_counter_3",san:-8,need:(S)=>S.flags.hasDiary,lockHint:"需要温瑶的日记"}
+  ]},
+"w_counter_2":{ch:"隐藏",title:"念日记",
+  text:`你翻开日记，念出最后一页的背面。\n\n"如果你在读这本日记——"\n\n"说明你已经认识我了。"\n\n"也说明，我不在人世了。"\n\n"请你不要恨我。"\n\n"我只是想回家。"\n\n念完的时候，温瑶一动不动。\n\n她低下头。\n\n"……我忘了。"\n\n"我忘了，我自己写过这句话。"\n\n<span class="d">（她开始哭。）</span>`,
+  choices:[{t:"走近她",to:"e_free_wenyao",san:-5}]},
+"w_counter_3":{ch:"隐藏",title:"扔日记",
+  text:`你把日记扔向她。\n\n日记在空中打开。\n\n页面翻飞。\n\n每一页上的字，都发出了微光。\n\n它们围住温瑶，像一个笼子。\n\n"你——"\n\n她来不及说完。\n\n日记合上了。\n\n她不见了。\n\n<span class="d">（地上，只留下一片褪色的蓝布。）</span>`,
+  choices:[
+    {t:"捡起蓝布",to:"e_killed_wenyao",san:-10},
+    {t:"不理它，回寝室",to:"e_killed_wenyao",san:-8}
+  ]},
+
+/* ============ 季默线（选季默） ============ */
+"f_stay":{ch:"隐藏",title:"站着不动",
+  text:`你没有动。\n\n温瑶没有动，季默也没有动。\n\n三个人就这样站在走廊里，谁都不肯先开口。\n\n头顶最后一盏灯，灭了。\n\n黑暗里，两个声音同时响起：\n\n"你选谁？"\n\n"你选谁？"\n\n你没有回答。\n\n沉默持续了很久。\n\n然后，左边传来一声很轻的叹息。\n\n右边也有一声。\n\n脚步声，一左一右，同时远去。\n\n走廊里只剩你一个人。\n\n你站在原地，一直站到天亮。\n\n天亮的时候，你发现自己的影子边缘，多了一道很淡的蓝色。\n\n<span class="d">（你没有选。但"名额"不会因为你不选就消失。）</span>`,
+  choices:[
+    {t:"走回 403",to:"d_back_dorm",san:-8,set:{refusedBoth:true}},
+    {t:"追向左边",to:"f_to_wenyao",san:-5,set:{refusedBoth:true}},
+    {t:"追向右边",to:"f_to_jinmo",san:-5,set:{refusedBoth:true}}
+  ]},
+"f_to_jinmo":{ch:"隐藏",title:"走向季默",
+  text:`你朝季默走过去。\n\n他抬起头。\n\n他的脸在灯光下，很白。\n\n"你选我了。"\n\n"对。"\n\n"好。"\n\n他咧嘴一笑。\n\n那是一个很冷、很饿的笑。\n\n"谢谢你。"\n\n"我等这一天，等了六年。"\n\n他抬起手。\n\n<span class="d">（他的手指，是半透明的。）</span>`,
+  choices:[{t:"⚡ 【躲 避】",act:"dodge",to:"j_attack_result",dodgeCount:4,dodgeNext:"j_attack_safe"}]},
+"j_attack_result":{ch:"隐藏",title:"袭击 · 结果",text:`（结算中）`,choices:[]},
+"j_attack_safe":{ch:"隐藏",title:"季默 · 完美躲过",
+  text:`你连着躲了四次。\n\n季默扑了个空。\n\n他撞在走廊的墙上。\n\n墙上出现了一道裂痕。\n\n他转身，看着你。\n\n"你——"\n\n他的身体，开始碎裂。\n\n像是一张被撕开的纸。\n\n地板上，留下一把男寝的钥匙。\n\n<span class="d">（男寝 402 钥匙已经放进背包。）</span>`,
+  choices:[
+    {t:"捡起钥匙",to:"j_after_attack",set:{has402Key:true,survivedJinmo:true}},
+    {t:"不捡，直接跑",to:"j_run_from_jinmo",set:{survivedJinmo:true}}
+  ]},
+"j_after_attack":{ch:"隐藏",title:"季默 · 之后",
+  text:`你捡起钥匙。\n\n钥匙上有一张小纸条。\n\n<span class="g">"如果我不在了，你替我去看看。"</span>\n\n<span class="g">"看什么？"</span>\n\n<span class="g">"看我的床还在不在。"</span>\n\n你回头。\n\n走廊里已经没有人了。\n\n只有墙上那道裂痕，还在。\n\n<span class="d">（你知道，你会去男寝的。）</span>`,
+  choices:[
+    {t:"回寝室休息",to:"d_back_dorm"},
+    {t:"现在就去男寝 402",to:"j_go_402",san:-5}
+  ]},
+"j_run_from_jinmo":{ch:"隐藏",title:"季默 · 逃跑",
+  text:`你转身就跑。\n\n身后传来碎裂的声音。\n\n你跑回女寝楼，冲进 403。\n\n反锁门。\n\n靠在门上喘气。\n\n门玻璃上，映出你的脸。\n\n你的脸旁边——\n\n是季默。\n\n他在笑。\n\n<span class="d">（他不打算放过你。）</span>`,
+  choices:[
+    {t:"摇响温瑶的铃铛",to:"j_bell_defense",need:(S)=>S.flags.hasBell,lockHint:"需要温瑶的铃铛"},
+    {t:"闭眼装睡",to:"j_ignore",san:-8}
+  ]},
+"j_bell_defense":{ch:"隐藏",title:"铃铛 · 驱散",
+  text:`你摇响铃铛。\n\n"叮——"\n\n季默的影像，在玻璃上晃了一下。\n\n然后消失了。\n\n门外传来一个声音，很远：\n\n"她给你的东西。"\n\n"你还留着。"\n\n"……"\n\n"那你就别用。"\n\n"因为那是她控制你的东西。"\n\n<span class="d">（你低头看铃铛。铃铛上的红绳，确实是温瑶的款式。）</span>`,
+  choices:[
+    {t:"把铃铛扔了",to:"j_throw_bell",san:-10},
+    {t:"继续留着",to:"d_back_dorm",san:-3,set:{wenyaoBellKept:true}}
+  ]},
+"j_throw_bell":{ch:"隐藏",title:"扔铃铛",
+  text:`你把铃铛扔进垃圾桶。\n\n铃铛落在垃圾桶里，没有声音。\n\n你等了一会儿。\n\n什么都没有发生。\n\n你正准备睡觉。\n\n忽然，垃圾桶里传来"叮"的一声。\n\n你猛地转头。\n\n铃铛——\n\n自己从垃圾桶里，飞了出来。\n\n落在你的床头。\n\n<span class="d">（铃铛自己回来了。）</span>`,
+  choices:[
+    {t:"不管它，睡觉",to:"d_back_dorm",san:-8,set:{bellReturned:true}},
+    {t:"再扔一次",to:"j_throw_bell_2",san:-10}
+  ]},
+"j_throw_bell_2":{ch:"隐藏",title:"铃铛 · 第二次",
+  text:`你又把铃铛扔了。\n\n扔出窗外。\n\n这次，你仔细听着。\n\n窗外，很远的地方，传来"叮"的一声。\n\n然后是一阵风声。\n\n然后——\n\n铃铛落在你的枕头上。\n\n<span class="r">它一直会回来。</span>\n\n<span class="d">（你终于明白，温瑶给的铃铛，是收不回的。）</span>`,
+  choices:[
+    {t:"接受它",to:"d_back_dorm",set:{bellPermanent:true}},
+    {t:"用剪刀剪断红绳",to:"j_cut_bell",san:-15}
+  ]},
+"j_cut_bell":{ch:"隐藏",title:"剪铃铛",
+  text:`你用剪刀剪断了红绳。\n\n铃铛掉在地上。\n\n这次，它没有动。\n\n你松了一口气。\n\n就在你准备上床的时候——\n\n你听见了。\n\n"叮。"\n\n声音不是从地上传来的。\n\n是从<span class="r">你自己身上</span>传来的。\n\n<span class="d">（红绳还在你手腕上。）</span>`,
+  choices:[{t:"……",to:"d_back_dorm",san:-20,set:{bellBound:true}}]},
+"j_ignore":{ch:"隐藏",title:"闭眼装睡",
+  text:`你闭上眼睛。\n\n门外很安静。\n\n过了很久。\n\n久到你以为他走了。\n\n忽然，你听见耳边有人说话：\n\n"我知道你醒着。"\n\n"你听着。"\n\n"她会让你签名的。"\n\n"她让你签的时候——"\n\n"别签。"\n\n"然后来找我。"\n\n"我教你，怎么对付她。"\n\n<span class="d">（你睁开眼。寝室里没有人。）</span>`,
+  choices:[{t:"记住了",to:"d_back_dorm",san:-5,set:{jinmoAdvice:true}}]},
+"j_go_402":{ch:"隐藏",title:"男寝 402",
+  text:`你去了男寝。\n\n门口没有人。\n\n你走进去，上了四楼。\n\n402 的门，是开着的。\n\n里面很干净。\n\n四张床。\n\n三张整齐，一张空着。\n\n空床的床头，放着一本日记。\n\n你走过去，翻开。\n\n第一页：\n\n<span class="r">"2019 年 9 月 8 日，今天是报到日。"</span>\n\n<span class="r">"我叫季默。"</span>\n\n<span class="r">"隔壁女寝有个女生，叫温瑶。"</span>\n\n<span class="r">"她很漂亮。"</span>\n\n<span class="r">"我想去认识她。"</span>`,
+  choices:[
+    {t:"继续往下翻",to:"j_diary_2",san:-5},
+    {t:"合上日记，离开",to:"j_leave_402",san:-5}
+  ]},
+"j_diary_2":{ch:"隐藏",title:"季默的日记",
+  text:`你继续翻。\n\n"9 月 12 日。今天我去了 403 门口。"\n\n"她没有出来。"\n\n"9 月 15 日。我又去了。"\n\n"她还是没出来。"\n\n"10 月 13 日。我听见 403 里有人哭。"\n\n"我敲门。"\n\n"门开了。"\n\n"我看见了她。"\n\n<span class="r">"她的脸，是白的。"</span>\n\n<span class="r">"她的裙子，是蓝的。"</span>\n\n<span class="r">"她伸出手，对我说——"</span>\n\n<span class="r">"帮我。"</span>`,
+  choices:[
+    {t:"翻到最后一页",to:"j_diary_3",san:-8},
+    {t:"合上日记",to:"j_leave_402",san:-5}
+  ]},
+"j_diary_3":{ch:"隐藏",title:"季默的日记 · 最后一页",
+  text:`你翻到最后一页。\n\n只有一行字。\n\n写得很大，很用力。\n\n<span class="r">"10 月 14 日，我替她签了。"</span>\n\n<span class="r">"她说她会回来救我。"</span>\n\n<span class="r">"她没有。"</span>\n\n<span class="r">"她在骗我。"</span>\n\n<span class="r">"但她没有骗你。"</span>\n\n<span class="r">"因为她喜欢你。"</span>\n\n<span class="r">"就像当年，喜欢我一样。"</span>\n\n<span class="d">（你终于明白，季默为什么会袭击你。）</span>`,
+  choices:[
+    {t:"合上日记，离开",to:"j_leave_402",san:-10,set:{knowJinmoTruth:true}},
+    {t:"把温瑶的日记，留在他的床头",to:"e_jinmo_free",san:-8,
+      need:(S)=>S.flags.hasDiary,lockHint:"需要温瑶的日记"}
+  ]},
+"j_leave_402":{ch:"隐藏",title:"离开男寝",
+  text:`你走出男寝。\n\n站在楼下，抬头看。\n\n四楼 402 的窗户里，站着一个人。\n\n他在看你。\n\n他没有动。\n\n只是看着。\n\n然后，他抬起手。\n\n对你做了一个动作。\n\n<span class="d">（他把手指，放在唇上。像是让你别说话。）</span>`,
+  choices:[
+    {t:"回寝室",to:"d_back_dorm"},
+    {t:"对他点点头",to:"j_nod",san:5,set:{jinmoTrust:1}}
+  ]},
+"j_nod":{ch:"隐藏",title:"点头",
+  text:`你对他点点头。\n\n他也点点头。\n\n然后他转身，走进房间。\n\n窗户上的灯灭了。\n\n你站在原地，很久。\n\n然后你听见，很远的地方，传来一声很轻的叹息。\n\n"……谢谢。"`,
+  choices:[{t:"回寝室",to:"d_back_dorm",san:5}]},
+
+/* ============ 最终抉择 & 新结局 ============ */
+"t_choice":{ch:"隐藏",title:"最 终 抉 择",
+  text:`你站在校门口。\n\n温瑶和季默，都站在你身后。\n\n两个人，都没有说话。\n\n你低头看手里的《新生手册》。\n\n最后一页，是空白的。\n\n空白纸上，有一个很浅很浅的凹痕。\n\n像是有人曾在那里，用力写过字。\n\n<span class="r">你必须在他们之间，选一个。</span>\n\n<span class="r">或者，谁都不选。</span>`,
+  choices:[
+    {t:"选择温瑶",to:"f_to_wenyao",san:-10},
+    {t:"选择季默",to:"f_to_jinmo",san:-10},
+    {t:"谁都不选",to:"e_both_free",san:-20,need:(S)=>S.flags.hasDiary && S.flags.hasJinmoCard,lockHint:"需要温瑶的日记 + 季默的学生证"},
+    {t:"撕掉《新生手册》",to:"e_visitor_break",san:-30,danger:true}
+  ]},
+"e_betrayed":{ch:"结局",ending:true,title:"结局 · 被温瑶背刺",
+  text:`你在《新生手册》最后一页，写下了自己的名字。\n\n写完的一瞬间，温瑶笑了。\n\n她第一次露出那种表情。\n\n很满足，很轻。\n\n"谢谢你。"\n\n"我终于可以走了。"\n\n她转身，走向花坛深处。\n\n她的身影越来越淡。\n\n而你的名字，从你身上慢慢脱落。\n\n一点一点地，飘向那本册子。\n\n<span class="r">你想起访客规则第五条——</span>\n\n<span class="r">"你选的访客会保护你，直到你不再需要保护。"</span>\n\n<span class="r">保护结束的那一刻，就是你该小心的时候。</span>\n\n<span class="r">你早就该想起来的。</span>\n\n——【被温瑶背刺】结局达成。`,
+  ending:"被温瑶背刺",rank:"F"},
+"e_free_wenyao":{ch:"结局",ending:true,title:"结局 · 拯救温瑶",
+  text:`你选择了温瑶。\n\n但不是让她签名。\n\n你把她领到图书馆。\n\n你找到老太太，把日记放在桌上。\n\n"这是她的。"\n\n老太太推了推眼镜。\n\n"你想做什么？"\n\n"我想让她走。"\n\n老太太看了很久。\n\n然后她点点头。\n\n她拿出一张新的借书卡，写下温瑶的名字。\n\n然后她把卡撕成两半。\n\n"好了。"\n\n"她自由了。"\n\n你回头看。\n\n温瑶站在你身后，身体在变淡。\n\n"你——"\n\n"我什么？"\n\n"你为什么救我？"\n\n"因为你值得。"\n\n她愣了一下。\n\n然后她笑了。\n\n那个笑，是真正的笑。\n\n"谢谢你。"\n\n"谢谢你，从来没人这么对我说过。"\n\n她消失了。\n\n图书馆里，只剩下一张空白的借书卡。\n\n——【拯救温瑶】结局达成。`,
+  ending:"拯救温瑶",rank:"SS"},
+"e_killed_wenyao":{ch:"结局",ending:true,title:"结局 · 反杀温瑶 · 终",
+  text:`你把日记扔向温瑶。\n\n日记在空中打开。\n\n页面翻飞。\n\n每一页上的字，都发出微光。\n\n它们围住她，像一个笼子。\n\n"你——"\n\n她来不及说完。\n\n日记合上了。\n\n她不见了。\n\n地上，只留下一片褪色的蓝布。\n\n你捡起来。\n\n蓝布上，还带着一点温度。\n\n你把它收进口袋。\n\n从那天起，你经过花坛边的时候，\n\n总会觉得有人在看你。\n\n但你已经不怕了。\n\n——【反杀温瑶 · 终】结局达成。`,
+  ending:"反杀温瑶 · 终",rank:"S"},
+"e_become_her":{ch:"结局",ending:true,title:"结局 · 成为下一个温瑶",
+  text:`你站在原地，没有动。\n\n温瑶走到你面前。\n\n她抬起手，按在你的额头上。\n\n"你不躲。"\n\n"我不躲。"\n\n"你想好了？"\n\n"想好了。"\n\n"那我们就换。"\n\n她的手指，穿过你的额头。\n\n你看见了一条很长很长的走廊。\n\n走廊尽头，站着一个人。\n\n那是你。\n\n穿着褪色的蓝裙子。\n\n站在 403 门口。\n\n在等下一个新生。\n\n——【成为下一个温瑶】结局达成。`,
+  ending:"成为下一个温瑶",rank:"F"},
+"e_jinmo_free":{ch:"结局",ending:true,title:"结局 · 季默的解脱",
+  text:`你把温瑶的日记，放在季默手里。\n\n他翻开。\n\n他读得很慢。\n\n读到最后一页的时候，他哭了。\n\n"她真的写了。"\n\n"她真的。"\n\n"她不是骗我。"\n\n"她只是……"\n\n他合上日记。\n\n"只是她也没办法。"\n\n他抬起头。\n\n"谢谢。"\n\n"谢谢你告诉我。"\n\n"现在我可以走了。"\n\n他站起来。\n\n他的身体开始发光。\n\n然后他消失了。\n\n地上，只留下一张空学生证。\n\n——【季默的解脱】结局达成。`,
+  ending:"季默的解脱",rank:"S"},
+"e_jinmo_dead":{ch:"结局",ending:true,title:"结局 · 季默 · 不归",
+  text:`你转身离开。\n\n季默跪在原地。\n\n他没有叫住你。\n\n你回到寝室，关上门。\n\n第二天，你听说——\n\n男寝 402 的窗户，破了。\n\n从那以后，再也没有人在 402 出现过。\n\n只有偶尔，深夜经过男寝门口，\n\n会听见里面有人在数数。\n\n"一、二、三……四。"\n\n"一、二、三……四。"\n\n数到四，就会停下。\n\n然后重新开始。\n\n——【季默 · 不归】结局达成。`,
+  ending:"季默 · 不归",rank:"F"},
+"e_both_free":{ch:"结局",ending:true,title:"结局 · 双人自由",
+  text:`你站在校门口。\n\n温瑶在你左边。季默在你右边。\n\n你翻开手册，把温瑶的日记展开。\n\n把季默的学生证，放在日记上。\n\n然后你念出日记的最后一页：\n\n"请你不要恨我。"\n\n"我只是想回家。"\n\n念完的时候，你听见两个人的声音：\n\n"……"\n\n"……"\n\n"温瑶？"\n\n"季默？"\n\n他们同时抬头。\n\n他们看着彼此。\n\n很久。\n\n然后温瑶说：\n\n"对不起。"\n\n季默说：\n\n"没关系。"\n\n两个人一起笑了。\n\n然后，两个人一起，在你面前，慢慢变淡。\n\n最后，地上只留下两朵小白花。\n\n——【双人自由】结局达成。`,
+  ending:"双人自由",rank:"EX"},
+"e_visitor_break":{ch:"结局",ending:true,title:"结局 · 访客规则破解",
+  text:`你撕掉了《新生手册》。\n\n你撕掉了访客规则。\n\n你撕掉了所有你找到的、属于"过去"的东西。\n\n你站在校门口。\n\n风很大。\n\n温瑶在你身后。\n\n季默在你身后。\n\n两个人一起说：\n\n"你在做什么？"\n\n"我在做一件事。"\n\n"什么事？"\n\n"放你们走。"\n\n你转身。\n\n你看着他们。\n\n"我不是访客。"\n\n"我是这一届的第四个。"\n\n"但我可以不签。"\n\n"只要我不签——"\n\n"规则就没办法完成。"\n\n"你们两个就都走不了。"\n\n"但也杀不了我。"\n\n"这就是规则唯一的漏洞。"\n\n两个人沉默了。\n\n然后温瑶说：\n\n"你……"\n\n"你早就知道了。"\n\n"对。"\n\n"那你为什么——"\n\n"因为我想给你们一个选择。"\n\n两个人对视了一眼。\n\n然后他们一起笑了。\n\n"谢谢你。"\n\n——【访客规则破解】结局达成。`,
+  ending:"访客规则破解",rank:"SSS"},
 
 /* ============ 序章 ============ */
 "start":{ch:"序章",title:"临江大学 · 校门",
@@ -845,7 +1333,10 @@ const STORY = {
     {t:"回寝室找陈默聊聊",to:"d_chen_talk"},
     {t:"去操场走走，看那个跑步的女生",to:"m_playground"},
     {t:"去教务处，问能不能退学",to:"campus_admin",san:-6},
-    {t:"去一趟校医室，拿点药",to:"d_clinic"}
+    {t:"去一趟校医室，拿点药",to:"d_clinic"},
+    {t:"去图书馆门口转转",to:"v_first"},
+    {t:"去四号楼门口看看",to:"j_first"},
+    {t:"和苏也她们一起去旧教学楼",to:"s_plan"}
   ]},
 "d_clinic":{ch:"校园",title:"校医室",
   text:`你推开门。\n\n校医室的灯亮着，但里面没有人。\n\n桌上放着一包干茶叶，旁边压着一张纸条：\n\n「如果觉得撑不住，就泡一杯。\n\n一包只能喝一次。\n\n——校医」\n\n你把茶叶收进了口袋。\n\n<span class="d">（静心茶已经放进背包。它会在你理智低于 29 时自动消耗。）</span>`,
@@ -1161,9 +1652,14 @@ const STORY = {
   text:`你走出教学楼。\n\n天是灰白色的，像是刚下过雨。空气里有股泥土的味道。\n\n校园里一个人都没有。\n\n你回到宿舍楼，上了四楼，推开 403 的门。\n\n三张床。三个人还在睡。\n\n你走到自己床边，坐下。\n\n枕头底下，有一本深红色的册子。\n\n你翻开最后一页。\n\n空白。\n\n但在纸的中央，那个浅浅的凹痕，变得深了一点。\n\n像是有人已经写过，又擦掉了。`,
   choices:[
     {t:"把手册收好，躺下睡觉",to:"e_dawn_mid",set:{freed:true}},
+    {t:"起身，去门后把那张规则撕下来",to:"e_dawn",san:-5,
+      need:(S)=>S.flags.hasRules,lockHint:"需要先拿到寝室规则"},
     {t:"把手册扔进垃圾桶，彻底忘掉这一切",to:"e_loop",san:5},
     {t:"什么都不做，正常过完这一年",to:"e_safe",san:5},
-    {t:"留在学校，做两届之间的桥",to:"e_bridge",san:-6,need:(S)=>S.flags.sawNameList || S.flags.sawOld403,lockHint:"需要知道往届名单"}
+    {t:"留在学校，做两届之间的桥",to:"e_bridge",san:-6,need:(S)=>S.flags.sawNameList || S.flags.sawOld403,lockHint:"需要知道往届名单"},
+    {t:"带着日记和学生证，去校门口做最后的了断",to:"t_choice",san:-8,
+      need:(S)=>S.flags.hasDiary || S.flags.hasJinmoCard,
+      lockHint:"需要温瑶的日记或季默的学生证"}
   ]},
 "t_eva_teach":{ch:"教学楼",title:"撤离",
   text:`你跟着队伍下楼。\n\n楼梯间里挤满了人，但没有人说话。所有人都低着头，一个跟一个。\n\n你数了数前面的人。十个。二十个。三十个。\n\n走到二楼的时候，你听见前面有人在小声数：\n\n"一、二、三、四……"\n\n你想起手册上的话：<span class="r">不要在晚上数楼梯。</span>\n\n你想开口提醒，但喉咙发紧。\n\n队伍继续往下走。\n\n走到一楼的时候，你发现前面的人少了一半。\n\n没有人注意到。`,
@@ -1636,6 +2132,13 @@ function checkAutoCharm(){
     triggerHorrorEffect('light');
     return;
   }
+  if(S.sanity < 29 && S.flags.hasBell){
+    S.flags.hasBell = false;
+    S.sanity = clamp(S.sanity + 60, 0, 100);
+    toast('温瑶的铃铛自动响起！理智 +60');
+    triggerHorrorEffect('light');
+    return;
+  }
   if(S.sanity < 29 && S.flags.hasTea){
     S.flags.hasTea = false;
     S.sanity = clamp(S.sanity + 50, 0, 100);
@@ -1643,7 +2146,97 @@ function checkAutoCharm(){
     triggerHorrorEffect('light');
     return;
   }
+  if(S.sanity < 20 && S.flags.hasUmbrella){
+    S.flags.hasUmbrella = false;
+    S.sanity = clamp(S.sanity + 30, 0, 100);
+    toast('温瑶的伞自动撑开！理智 +30');
+    triggerHorrorEffect('light');
+    return;
+  }
+  if(S.sanity < 20 && S.flags.hasNote){
+    S.flags.hasNote = false;
+    S.sanity = clamp(S.sanity + 30, 0, 100);
+    toast('温瑶的便条自动燃烧！理智 +30');
+    triggerHorrorEffect('light');
+    return;
+  }
 }
+
+/* ══════════ 躲避系统 ══════════ */
+let dodgeState = null;
+function startDodge(count, nextNode){
+  dodgeState = { total:count, done:0, hits:0, nextNode };
+  runDodgeRound();
+}
+function runDodgeRound(){
+  const d = dodgeState;
+  const times = [1500, 1200, 900, 600];
+  const duration = times[Math.min(d.done, times.length-1)];
+  const dd = $('dodge');
+  $('dodgeCount').textContent = `· 第 ${d.done+1} / ${d.total} 次 ·`;
+  $('dodgeHint').textContent = '立刻点击按钮 · 时间不多了';
+  dd.classList.add('on','shake');
+  const bar = $('dodgeTimerBar');
+  bar.style.transition = 'none'; bar.style.width = '100%';
+  void bar.offsetWidth;
+  bar.style.transition = `width ${duration}ms linear`;
+  bar.style.width = '0%';
+  let clicked = false;
+  const btn = $('dodgeBtn');
+  const timer = setTimeout(()=>{
+    if(!clicked){ finishRound(false); }
+  }, duration);
+  const onClick = ()=>{
+    if(clicked) return;
+    clicked = true; clearTimeout(timer);
+    finishRound(true);
+  };
+  btn.onclick = (e)=>{ e.stopPropagation(); onClick(); };
+  dd.onclick = onClick;
+  function finishRound(success){
+    dd.classList.remove('on','shake');
+    dd.onclick = null; btn.onclick = null;
+    if(success){ d.hits++; triggerHorrorEffect('light'); }
+    else { S.sanity = clamp(S.sanity - 12, 0, 100); updateHUD(); triggerHorrorEffect('heavy'); }
+    d.done++;
+    if(d.done >= d.total){ endDodge(); }
+    else { setTimeout(runDodgeRound, 120); }
+  }
+}
+function endDodge(){
+  const d = dodgeState; dodgeState = null;
+  const hits = d.hits, total = d.total;
+  const r = $('dodgeResult');
+  let title, body, nextNode;
+  if(hits === total){
+    title = '完 美 躲 避';
+    body = `你在 ${total} 次袭击中全部躲开了。\n\n袭击者扑了个空。`;
+    S.sanity = clamp(S.sanity + 5, 0, 100);
+    nextNode = (d.nextNode === 's_after_dodge') ? 's_safe' : d.nextNode;
+  } else if(hits >= total - 1){
+    title = '险 些 躲 过';
+    body = `你躲开了大部分袭击。\n\n但还是受了一点伤。`;
+    S.sanity = clamp(S.sanity - 15, 0, 100);
+    nextNode = (d.nextNode === 's_after_dodge') ? 's_escape' : (d.nextNode === 'j_attack_safe' ? 'j_run_from_jinmo' : d.nextNode);
+  } else if(hits >= 1){
+    title = '受 伤';
+    body = `你躲开了部分袭击。\n\n肩膀被划了一道。`;
+    S.sanity = clamp(S.sanity - 40, 0, 100);
+    nextNode = (d.nextNode === 's_after_dodge') ? 's_su_hurt' : (d.nextNode === 'j_attack_safe' ? 'j_run_from_jinmo' : d.nextNode);
+  } else {
+    title = '被 击 中';
+    body = `你一次也没躲开。\n\n眼前一黑。`;
+    S.sanity = clamp(S.sanity - 60, 0, 100);
+    nextNode = (d.nextNode === 's_after_dodge') ? 's_hit' : (d.nextNode === 'j_attack_safe' ? 'j_run_from_jinmo' : d.nextNode);
+  }
+  updateHUD();
+  if(S.sanity <= 0){ closeDodgeResult(); goto('e_mad'); return; }
+  $('dodgeResultTitle').textContent = title;
+  $('dodgeResultBody').textContent = body;
+  r.classList.add('on');
+  $('dodgeResultBtn').onclick = ()=>{ closeDodgeResult(); goto(nextNode); };
+}
+function closeDodgeResult(){ $('dodgeResult').classList.remove('on'); }
 
 function renderInteractOptions(list){
   const box = $('itActions');
@@ -1806,12 +2399,14 @@ function render(noAnim){
 
     btn.onclick = ()=>{
       if(locked){ toast('条件未满足：' + (c.lockHint || '')); return; }
-      if(c.act === 'camera' || c.act === 'interact'){
+      if(c.act === 'camera' || c.act === 'interact' || c.act === 'dodge'){
         if(c.san) S.sanity = clamp(S.sanity + c.san, 0, 100);
         if(c.set) Object.assign(S.flags, c.set);
         checkAutoCharm();
         updateHUD();
-        if(c.act === 'camera') openCamera(c.to); else openInteract(c.it);
+        if(c.act === 'camera') openCamera(c.to);
+        else if(c.act === 'interact') openInteract(c.it);
+        else if(c.act === 'dodge') startDodge(c.dodgeCount||3, c.dodgeNext||c.to);
         return;
       }
       S.used[key] = true;
@@ -1842,8 +2437,8 @@ function openMenu(){
   closeViewer(); closeInteract();
   const p = $('panel');
   let html = '<h2>存 档 管 理</h2>';
-  const slotNames = {auto:'自动存档', s1:'存档位 1', s2:'存档位 2', s3:'存档位 3', s4:'存档位 4'};
-  ['auto','s1','s2','s3','s4'].forEach(k=>{
+  const slotNames = {auto:'自动存档', s1:'存档位 1', s2:'存档位 2', s3:'存档位 3', s4:'存档位 4', s5:'存档位 5', s6:'存档位 6'};
+  ['auto','s1','s2','s3','s4','s5','s6'].forEach(k=>{
     const d = SLOTS[k];
     let info = '<b>' + slotNames[k] + '</b><small>（空）</small>';
     if(d){
@@ -1904,27 +2499,75 @@ function initTitle(){
 }
 function hideTitle(){ $('title-screen').style.display = 'none'; }
 
+/* ═══════ BGM ═══════
+   建议把 mp3 下载到本地，文件名改成 'bgm1.mp3' / 'bgm2.mp3'，
+   这是最可靠的方案。远程源仅作备份，挂掉会自动切下一个。 */
 const BGM_LIST = [
-  'https://cdn.jsdelivr.net/gh/appleandding/ypyp@main/waltz%20in17edo(%E7%BA%AF%E4%BA%AB%E9%9F%B3%E4%B9%90%E7%89%88)%20-%20NyxLunx%26%E8%8B%8F%E5%AD%90%E5%A2%A8%26Sixteen.mp3',
-  'https://cdn.jsdelivr.net/gh/appleandding/ypyp@main/Waltz%20in%2021edo%20-%20Deister%20Orchestra.mp3'
+  { name:'Waltz in 17edo',
+    src:'https://cdn.jsdelivr.net/gh/appleandding/ypyp@main/waltz%20in17edo(%E7%BA%AF%E4%BA%AB%E9%9F%B3%E4%B9%90%E7%89%88)%20-%20NyxLunx%26%E8%8B%8F%E5%AD%90%E5%A2%A8%26Sixteen.mp3' },
+  { name:'Waltz in 21edo',
+    src:'https://cdn.jsdelivr.net/gh/appleandding/ypyp@main/Waltz%20in%2021edo%20-%20Deister%20Orchestra.mp3' }
 ];
-let bgmIndex = 0;
-let bgmAudio = new Audio();
-let bgmStarted = false;
-function playCurrentBGM(){ bgmAudio.src = BGM_LIST[bgmIndex]; bgmAudio.play().then(()=>{ bgmStarted = true; }).catch(()=>{}); }
+
+const bgmAudio = new Audio();
+bgmAudio.preload = 'auto';
+bgmAudio.volume = 0.4;
+
+let bgmIndex   = 0;
+let bgmUnlocked = false;
+const bgmBroken = new Set();
+
+function bgmTryPlay(){
+  if(bgmBroken.size >= BGM_LIST.length){
+    console.warn('[BGM] 所有音源均不可用，已静音');
+    return;
+  }
+  while(bgmBroken.has(bgmIndex)){
+    bgmIndex = (bgmIndex + 1) % BGM_LIST.length;
+  }
+  const cur = BGM_LIST[bgmIndex];
+  bgmAudio.src = cur.src;
+  const p = bgmAudio.play();
+  if(p && p.catch){
+    p.catch(err=>{
+      if(err && err.name !== 'NotAllowedError'){
+        console.warn('[BGM] 加载失败：', cur.name, err);
+        bgmBroken.add(bgmIndex);
+        bgmIndex = (bgmIndex + 1) % BGM_LIST.length;
+        setTimeout(bgmTryPlay, 250);
+      }
+    });
+  }
+}
+
+bgmAudio.addEventListener('ended', ()=>{
+  bgmIndex = (bgmIndex + 1) % BGM_LIST.length;
+  bgmTryPlay();
+});
+bgmAudio.addEventListener('error', ()=>{
+  console.warn('[BGM] 资源错误：', BGM_LIST[bgmIndex].name);
+  bgmBroken.add(bgmIndex);
+  bgmIndex = (bgmIndex + 1) % BGM_LIST.length;
+  if(bgmBroken.size < BGM_LIST.length) setTimeout(bgmTryPlay, 250);
+});
+
 function initBGM(){
-  bgmAudio.preload = 'auto';
-  bgmAudio.addEventListener('ended', ()=>{ bgmIndex = (bgmIndex + 1) % BGM_LIST.length; playCurrentBGM(); });
-  playCurrentBGM();
-  const unlockAudio = ()=>{
-    if(!bgmStarted) playCurrentBGM();
-    if(bgmStarted){
-      window.removeEventListener('click', unlockAudio);
-      window.removeEventListener('touchstart', unlockAudio);
+  bgmTryPlay();
+  const unlock = ()=>{
+    if(bgmAudio.paused){
+      bgmAudio.play()
+        .then(()=>{ bgmUnlocked = true; })
+        .catch(()=>{});
+    }
+    if(bgmUnlocked){
+      window.removeEventListener('pointerdown', unlock);
+      window.removeEventListener('touchstart',  unlock);
+      window.removeEventListener('keydown',     unlock);
     }
   };
-  window.addEventListener('click', unlockAudio, { passive: true });
-  window.addEventListener('touchstart', unlockAudio, { passive: true });
+  window.addEventListener('pointerdown', unlock, { passive:true });
+  window.addEventListener('touchstart',  unlock, { passive:true });
+  window.addEventListener('keydown',     unlock);
 }
 
 window.addEventListener('load', ()=>{
