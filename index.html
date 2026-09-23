@@ -1,0 +1,5452 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>临江大学 · 新生手册</title>
+<style>
+:root{
+  --bg:#0a0b0d; --panel:#111216; --line:#22242a;
+  --txt:#c8c5be; --dim:#6f6c66; --red:#8c2b2b; --red2:#c04a4a; --gold:#b39a5f;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0}
+body{
+  background:radial-gradient(ellipse at 50% -10%,#191b20 0%,transparent 62%),var(--bg);
+  color:var(--txt);
+  font-family:"Songti SC","STSong","Noto Serif SC","SimSun",serif;
+  display:flex;justify-content:center;
+  min-height:100vh;overflow-x:hidden;
+}
+#app{width:100%;max-width:760px;min-height:100vh;display:flex;flex-direction:column;padding:0 18px 28px;}
+
+/* ---------- 顶栏 ---------- */
+#top{
+  position:sticky;top:0;z-index:20;
+  background:linear-gradient(#0a0b0d 70%,rgba(10,11,13,0));
+  padding:14px 0 10px;
+}
+#topbar{display:flex;align-items:center;gap:10px;justify-content:space-between}
+#chapter{font-size:12px;letter-spacing:.28em;color:var(--red2);opacity:.9}
+#menubtns{display:flex;gap:8px}
+.mbtn{
+  background:transparent;border:1px solid var(--line);color:var(--dim);
+  font-family:inherit;font-size:12px;padding:5px 11px;border-radius:2px;cursor:pointer;
+  letter-spacing:.1em;transition:.2s;
+}
+.mbtn:hover{border-color:var(--red);color:var(--red2)}
+#status{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:11px;color:var(--dim);letter-spacing:.08em}
+#sanwrap{flex:1;height:3px;background:#1c1e23;border-radius:2px;overflow:hidden;max-width:220px}
+#sanbar{height:100%;width:100%;background:linear-gradient(90deg,#5d4a2a,#b39a5f);transition:width .5s,background .5s}
+
+/* ---------- 正文 ---------- */
+#story{flex:1;padding:22px 2px 10px;animation:fade .55s ease}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+h1.title{
+  font-size:19px;font-weight:400;letter-spacing:.22em;color:#ded9cf;
+  margin:0 0 20px;padding-left:12px;border-left:2px solid var(--red);
+}
+#text{font-size:16px;line-height:2.05;letter-spacing:.03em;white-space:pre-wrap;color:#bdb9b1}
+#text .r{color:var(--red2)}
+#text .g{color:var(--gold)}
+#text .d{color:var(--dim);font-size:14px}
+
+/* ---------- 选项 ---------- */
+#choices{margin-top:26px;display:flex;flex-direction:column;gap:11px}
+.ch{
+  display:block;width:100%;text-align:left;cursor:pointer;
+  background:linear-gradient(90deg,rgba(30,32,38,.85),rgba(20,21,25,.55));
+  border:1px solid var(--line);border-left:2px solid #33363d;
+  color:#b8b4ac;font-family:inherit;font-size:15px;line-height:1.7;
+  padding:14px 16px;border-radius:2px;transition:.22s;
+}
+.ch:hover{border-left-color:var(--red2);color:#e6e1d7;background:linear-gradient(90deg,rgba(60,30,30,.5),rgba(20,21,25,.5));transform:translateX(3px)}
+.ch .hint{display:block;font-size:11.5px;color:#5d5a55;margin-top:5px;letter-spacing:.05em}
+.ch.locked{opacity:.32;cursor:not-allowed;filter:grayscale(1)}
+.ch.locked:hover{transform:none;border-left-color:#33363d;color:#b8b4ac;background:linear-gradient(90deg,rgba(30,32,38,.85),rgba(20,21,25,.55))}
+
+/* ---------- 结局 ---------- */
+.ending-box{margin-top:34px;text-align:center;animation:fade .9s ease}
+.ending-tag{font-size:12px;letter-spacing:.5em;color:var(--red2);margin-bottom:14px}
+.ending-name{font-size:26px;letter-spacing:.18em;color:#e8e2d6;margin-bottom:20px}
+.ending-sub{font-size:13px;color:var(--dim);line-height:2;letter-spacing:.06em}
+
+/* ---------- 弹窗 ---------- */
+#mask{
+  position:fixed;inset:0;background:rgba(4,5,7,.9);backdrop-filter:blur(3px);
+  display:none;align-items:center;justify-content:center;z-index:60;padding:18px;
+}
+#mask.on{display:flex}
+.panel{
+  width:100%;max-width:480px;background:#0e0f12;border:1px solid var(--line);
+  border-radius:3px;padding:22px;max-height:82vh;overflow-y:auto;
+}
+.panel h2{font-size:14px;letter-spacing:.3em;color:var(--red2);font-weight:400;margin:0 0 18px}
+.slot{
+  border:1px solid var(--line);padding:12px 14px;margin-bottom:9px;border-radius:2px;
+  font-size:13px;display:flex;justify-content:space-between;align-items:center;gap:10px;
+}
+.slot .info{color:#9a968f;line-height:1.6;flex:1;min-width:0}
+.slot .info b{color:#cdc8bf;font-weight:400}
+.slot .info small{color:#5d5a55;font-size:11px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.slot .acts{display:flex;gap:6px;flex-shrink:0}
+.mini{background:transparent;border:1px solid #33363d;color:#8f8b84;font-family:inherit;font-size:11.5px;padding:5px 10px;border-radius:2px;cursor:pointer;transition:.2s;letter-spacing:.08em}
+.mini:hover{border-color:var(--red);color:var(--red2)}
+.mini.danger:hover{border-color:#a33;color:#e05a5a}
+.panel .close{width:100%;margin-top:14px;background:transparent;border:1px solid var(--line);color:var(--dim);font-family:inherit;padding:11px;cursor:pointer;letter-spacing:.2em;font-size:13px;border-radius:2px}
+.panel .close:hover{border-color:var(--red);color:var(--red2)}
+#toast{
+  position:fixed;left:50%;bottom:44px;transform:translateX(-50%) translateY(20px);
+  background:#16181c;border:1px solid var(--line);color:#c0bcb4;
+  padding:10px 20px;font-size:13px;letter-spacing:.12em;border-radius:2px;
+  opacity:0;pointer-events:none;transition:.35s;z-index:99;
+}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ---------- 标题页 ---------- */
+#title-screen{
+  position:fixed;inset:0;background:radial-gradient(ellipse at 50% 30%,#16181d,#060708 75%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:80;padding:24px;text-align:center;
+}
+#title-screen h1{font-size:30px;letter-spacing:.4em;color:#ded7c9;font-weight:400;margin:0 0 8px;text-shadow:0 0 30px rgba(140,43,43,.35)}
+#title-screen .sub{font-size:12px;letter-spacing:.45em;color:var(--red2);margin-bottom:46px}
+#title-screen .tbtn{
+  width:230px;padding:14px;margin-bottom:12px;background:transparent;
+  border:1px solid #2c2f35;color:#a9a59d;font-family:inherit;font-size:14px;
+  letter-spacing:.28em;cursor:pointer;border-radius:2px;transition:.25s;
+}
+#title-screen .tbtn:hover{border-color:var(--red);color:#e0d9cd;background:rgba(140,43,43,.09)}
+#title-screen .foot{margin-top:40px;font-size:11px;color:#3f4247;letter-spacing:.18em;line-height:2}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-thumb{background:#24262b;border-radius:3px}
+
+/* ---------- 恐怖视觉特效 ---------- */
+#horror-overlay{
+  position:fixed;inset:0;pointer-events:none;z-index:50;
+  transition:box-shadow .6s ease, opacity .6s ease;
+  opacity:0;
+}
+/* 理智低于50：边缘泛黑发暗 */
+#horror-overlay.san-mid{
+  opacity:1;
+  box-shadow:inset 0 0 100px rgba(0,0,0,0.85), inset 0 0 40px rgba(80,10,10,0.4);
+}
+/* 理智低于30：血色暗角心跳搏动 */
+#horror-overlay.san-low{
+  opacity:1;
+  animation:heartPulse 1.3s infinite ease-in-out;
+}
+@keyframes heartPulse{
+  0%,100%{ box-shadow:inset 0 0 80px rgba(100,0,0,0.5), inset 0 0 160px rgba(0,0,0,0.9); }
+  50%{ box-shadow:inset 0 0 140px rgba(190,20,20,0.85), inset 0 0 200px rgba(30,0,0,0.95); }
+}
+
+/* 惊吓冲击：反相高对比红光闪屏 */
+body.scare-flash{
+  animation:scareFlash .38s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
+}
+@keyframes scareFlash{
+  0%{ filter:invert(1) hue-rotate(180deg) contrast(300%) brightness(1.2); transform:scale(1.02); }
+  40%{ filter:invert(0.6) hue-rotate(330deg) drop-shadow(0 0 30px #f00); }
+  100%{ filter:none; transform:scale(1); }
+}
+
+/* 剧烈震屏 */
+body.scare-shake{
+  animation:screenShake .45s cubic-bezier(.36,.07,.19,.97) both;
+}
+@keyframes screenShake{
+  10%,90%{ transform:translate3d(-4px,-2px,0) rotate(-0.5deg); }
+  20%,80%{ transform:translate3d(5px,3px,0) rotate(0.8deg); }
+  30%,50%,70%{ transform:translate3d(-6px,4px,0) rotate(-0.6deg); }
+  40%,60%{ transform:translate3d(6px,-4px,0) rotate(0.5deg); }
+}
+
+/* 红色危险词汇与低理智下的文字故障抖动 */
+.glitch-txt{
+  display:inline-block;
+  animation:glitchAnim .28s infinite alternate ease-in-out;
+  text-shadow:-1.5px 0 #c04a4a, 1.5px 0 #2a5a8a;
+}
+@keyframes glitchAnim{
+  0%{ transform:skew(0deg); }
+  30%{ transform:skew(-6deg) scaleY(1.05); }
+  70%{ transform:skew(4deg) translate(-1px, 1px); }
+  100%{ transform:skew(0deg); }
+}
+</style>
+</head>
+<body>
+
+<!-- 恐怖氛围特效遮罩 -->
+<div id="horror-overlay"></div>
+
+<div id="app">
+  <div id="top">
+    <div id="topbar">
+      <span id="chapter">— 序章 —</span>
+      <div id="menubtns">
+        <button class="mbtn" onclick="openMenu()">存读档</button>
+      </div>
+    </div>
+    <div id="status">
+      <span>理智</span>
+      <div id="sanwrap"><div id="sanbar"></div></div>
+      <span id="santxt">100</span>
+      <span id="itemtxt" style="margin-left:8px;color:#8a6f3f"></span>
+    </div>
+  </div>
+  <div id="story">
+    <h1 class="title" id="ttl"></h1>
+    <div id="text"></div>
+  </div>
+  <div id="choices"></div>
+</div>
+
+<!-- 标题页 -->
+<div id="title-screen">
+  <h1>临江大学</h1>
+  <div class="sub">新 生 手 册</div>
+  <button class="tbtn" id="btn-continue" style="display:none">继 续 游 戏</button>
+  <button class="tbtn" id="btn-new">开 始 新 生 报 到</button>
+  <button class="tbtn" id="btn-load">读 取 存 档</button>
+  <div class="foot">
+    本游戏进度不可回退。<br>
+    做出的选择无法撤销，除非读取存档。
+  </div>
+</div>
+
+<!-- 弹窗 -->
+<div id="mask">
+  <div class="panel" id="panel"></div>
+</div>
+<div id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   状态与存档
+   ═══════════════════════════════════════════════════════════ */
+const SAVE_KEY = 'linjiang_saves_v2';
+let SLOTS = { auto:null, s1:null, s2:null, s3:null, s4:null };
+
+let S = null;
+
+function newState(){
+  return {
+    node:'start',
+    sanity:100,
+    flags:{},
+    used:{},
+    entered:{},
+    steps:0,
+    t:Date.now()
+  };
+}
+
+function loadSaves(){
+  try{
+    const raw = localStorage.getItem(SAVE_KEY);
+    if(raw){ const d = JSON.parse(raw); if(d && typeof d==='object') SLOTS = Object.assign(SLOTS,d); }
+  }catch(e){}
+}
+function persist(){
+  try{ localStorage.setItem(SAVE_KEY, JSON.stringify(SLOTS)); }catch(e){ toast('存档失败：存储空间不足'); }
+}
+function clone(o){ return JSON.parse(JSON.stringify(o)); }
+function saveTo(slot){
+  SLOTS[slot] = { state: clone(S), node:S.node, time:Date.now() };
+  persist();
+}
+function loadFrom(slot){
+  if(!SLOTS[slot]) { toast('该存档位为空'); return false; }
+  S = clone(SLOTS[slot].state);
+  S.node = SLOTS[slot].node;
+  closeMask();
+  render(true);
+  return true;
+}
+function autoSave(){ saveTo('auto'); }
+
+/* ═══════════════════════════════════════════════════════════
+   剧情数据
+   ═══════════════════════════════════════════════════════════ */
+const STORY = {
+
+/* ═══════════════ 序章 ═══════════════ */
+
+"start":{
+  ch:"序章",title:"临江大学 · 校门",
+  text:`九月的风里有一股铁锈味。
+
+你拖着行李箱站在"临江大学"的校门下。牌匾上的字是暗红色的，像是被人反复描过很多遍——描得太厚，反而看不清笔画。
+
+手机里新生群还在跳消息：
+
+【新生A】有人知道为什么官网的校历只排到12月31日吗？
+【新生B】别问。
+【新生B】别问。
+【新生B】别问。
+【学姐-周】欢迎来到临江大学。请务必保管好你的《新生手册》。
+【学姐-周】以及——不要在晚上数楼梯。`,
+  choices:[
+    {t:"去报到处领《新生手册》",to:"p_baodao"},
+    {t:"在校门口拍一张照",to:"p_photo"},
+    {t:"私聊学姐-周，问清楚",to:"p_ask"}
+  ]
+},
+
+"p_photo":{
+  ch:"序章",title:"校门 · 照片",
+  text:`你举起手机，把牌匾框进取景框。
+
+"咔嚓。"
+
+照片里，校门下站着很多人——拖着行李的新生、举牌的志愿者、撑伞的家长。
+
+你数了数。你数不清。
+
+照片右下角，有个穿深蓝色外套的女生正对着镜头笑。她没有影子。
+
+你抬头看向真实的校门。没有人对你笑。`,
+  choices:[
+    {t:"把照片删掉",to:"p_photo_del",set:{sawBlue:true}},
+    {t:"放大看看那个女生",to:"p_photo_zoom",san:-6,set:{sawBlue:true}}
+  ]
+},
+"p_photo_del":{
+  ch:"序章",title:"删除",
+  text:`你按下删除。
+
+相册问："确定要删除这张照片吗？"
+
+你点了确定。照片消失了。
+
+但你的手机相册里，最后一张照片变成了一张新图——校门口，空无一人，只有你自己的行李箱孤零零立在原地。
+
+而行李箱旁边，站着一双没穿鞋的脚。
+
+你锁屏。手心全是汗。
+
+"同学，报到处在这边。"一个学姐笑着指路。`,
+  choices:[{t:"跟着学姐去报到处",to:"p_baodao"}]
+},
+"p_photo_zoom":{
+  ch:"序章",title:"放大",
+  text:`你把照片放大到最大。
+
+那个深蓝色外套的女生，脸是模糊的。但她举着一块牌子，牌子上写着：
+
+【欢迎新同学 · 第 4 届】
+
+第4届？临江大学建校一百多年了。
+
+你再看时，女生的位置变成了空白。照片里只剩下你一个人，站在校门下，笑得僵硬。
+
+你根本没笑过。`,
+  choices:[
+    {t:"立刻删掉照片，去报到处",to:"p_baodao",set:{sawBlue:true}},
+    {t:"把这张照片设为壁纸",to:"p_photo_wall",san:-10,set:{sawBlue:true,wallpaper:true}}
+  ]
+},
+"p_photo_wall":{
+  ch:"序章",title:"壁纸",
+  text:`你鬼使神差地把那张照片设成了壁纸。
+
+屏幕暗下去的一瞬间，你看见锁屏上自己的倒影——倒影里的你，穿的是深蓝色外套。
+
+你迅速按亮屏幕。壁纸变成了纯黑。
+
+你松了一口气，把手机塞进口袋，转身往报到处走。身后，校门牌匾上的暗红字迹似乎又厚了一层。`,
+  choices:[{t:"去报到处",to:"p_baodao"}]
+},
+
+"p_ask":{
+  ch:"序章",title:"私聊",
+  text:`你点开学姐-周的头像，打了一行字：
+
+"学姐，为什么晚上不能数楼梯？"
+
+对方"正在输入……"了很久。
+
+【学姐-周】你还没领手册吧。
+【学姐-周】去领。
+【学姐-周】领完先看第 3 页，再看第 7 页。
+【学姐-周】顺序不能错。
+【学姐-周】最后——
+【学姐-周】如果你在宿舍听到有人叫你的名字，只叫了一声，不要答应。`,
+  choices:[
+    {t:"再问：叫两声呢？",to:"p_ask2"},
+    {t:"道谢，去领手册",to:"p_baodao",set:{knowsName:true}}
+  ]
+},
+"p_ask2":{
+  ch:"序章",title:"两声",
+  text:`【你】那叫两声呢？
+
+对方沉默了很久。
+
+【学姐-周】叫两声，你就要看猫眼。
+【学姐-周】如果猫眼外面黑得像没开灯——
+【学姐-周】那你就当没听见。
+【学姐-周】还有，别问我叫什么名字。
+【学姐-周】我已经毕业三年了。
+
+你盯着"毕业三年"这四个字。
+
+聊天框上方，她的昵称变成了灰色。
+
+【该用户已注销】`,
+  choices:[
+    {t:"去报到处领手册",to:"p_baodao",san:-8,set:{knowsName:true,ghostSenior:true}}
+  ]
+},
+
+"p_baodao":{
+  ch:"序章",title:"报到处",
+  text:`报到处设在老体育馆里，空气闷得像盖了层棉被。
+
+排在你前面的女生小声抱怨："这手册好厚啊，跟砖头一样。"
+
+轮到你时，桌后的老师抬起头。她的眼睛很亮，亮得不太正常。
+
+"姓名、学号。"
+
+你报上信息。她在一本泛黄的本子上划了一笔，然后把一本深红色封皮的册子推过来。
+
+《临江大学 · 新生手册》
+
+封皮上没有校徽，只有一个烫金的数字：<span class="r">403</span>。
+
+"保管好。"她说，"丢了的话……我们也没办法补。"`,
+  choices:[
+    {t:"当场翻开看",to:"p_manual"},
+    {t:"先塞进包里，去找宿舍",to:"p_road"}
+  ]
+},
+
+"p_manual":{
+  ch:"序章",title:"新生手册",
+  text:`你翻开手册。
+
+第一页是校长致辞，字体很正，措辞很怪：
+
+"……希望各位同学在临江大学度过四年，或者更久，或者更短……"
+
+第二页是校园地图。你找了半天，发现地图上所有的建筑都标了号，唯独有一栋没有——教学楼西侧，一片灰色的空白。
+
+第三页开始，是<span class="r">校规总则</span>。`,
+  choices:[
+    {t:"认真读完校规总则",to:"p_rules1"},
+    {t:"直接跳到第7页",to:"p_rules7",set:{skipTo7:true}}
+  ]
+},
+
+"p_rules1":{
+  ch:"序章",title:"校规总则",
+  text:`<span class="r">【临江大学学生行为守则 · 总则】</span>
+
+一、本校所有课程均在 23:00 前结束。若你在 23:00 后仍听到下课铃，请留在原地，闭眼，默数六十下。
+
+二、本校只有十二层以下的楼层。若你在电梯中看到"13"，请立刻按下所有按钮，并在最近的楼层离开。
+
+三、图书馆闭馆时间为 22:00。若 22:00 后馆内仍亮着灯，那不是图书馆。
+
+四、食堂每餐只提供三样菜。若你看到第四样菜，请假装没看见，并且当天不要再进食堂。
+
+五、若你发现自己在数楼梯，请立刻停下。楼梯的阶数不是固定的。
+
+六、本校没有"深蓝色外套"的校服。若有人穿深蓝色外套向你问路，请回答"我不知道"，然后离开，不要回头。
+
+七、<span class="g">以上规则不适用于 403 寝室。</span>
+
+你盯着第七条看了很久。
+
+"不适用于 403 寝室。"
+
+——是什么意思？`,
+  choices:[
+    {t:"翻到第 7 页",to:"p_rules7"},
+    {t:"合上手册，去找宿舍",to:"p_road",set:{readRules:true}}
+  ]
+},
+
+"p_rules7":{
+  ch:"序章",title:"第 7 页",
+  text:`第 7 页只有一行字，居中，字号很大：
+
+<span class="r">"403 寝室的规则，贴在 403 寝室的门后。"</span>
+
+下面还有一行小字，像是后来加上去的，笔迹潦草：
+
+<span class="d">"如果你被分到了 403，请无论如何，活到毕业。"</span>
+
+你翻到第 8 页。
+
+第 8 页被撕掉了。
+
+撕口很整齐，像是用尺子比着裁的。`,
+  choices:[
+    {t:"去宿舍楼",to:"p_road",set:{readRules:true,know403:true}}
+  ]
+},
+
+"p_road":{
+  ch:"序章",title:"通往宿舍",
+  text:`宿舍区在校区最北边，要穿过一整条梧桐道。
+
+九月了，梧桐叶却一片都没黄，绿得发黑，垂得很低。
+
+路上没什么人。你走了大约十分钟，忽然意识到一件事——
+
+你已经经过了四次"三号宿舍楼"。
+
+第一次，你以为是看错了。第二次，你告诉自己校区布局重复。第三次，你停下脚步，抬头认真看清了楼牌：
+
+<span class="r">三号宿舍楼</span>
+
+第四次，你站在同一块楼牌下。
+
+而你手里的新生手册，第 12 页的宿舍分配表上，白纸黑字写着：
+
+<span class="g">姓名：你　寝室：403　楼号：四号楼</span>`,
+  choices:[
+    {t:"继续往前走，找四号楼",to:"p_road2"},
+    {t:"回头，原路返回校门",to:"p_road_back"},
+    {t:"站在原地，翻开手册第 12 页再看一遍",to:"p_road3",san:-5}
+  ]
+},
+"p_road2":{
+  ch:"序章",title:"继续",
+  text:`你决定不再理会那块楼牌，埋头往前。
+
+梧桐叶在头顶沙沙作响，像是有人在低声念你的名字。
+
+走了大约五分钟，一栋灰白色的老楼出现在视野尽头。楼牌上写着：
+
+<span class="g">四号宿舍楼</span>
+
+你松了口气。
+
+但就在你踏进楼门的一瞬间，你听见身后传来一声极轻的、几乎听不见的叹息。
+
+"……又来一个。"`,
+  choices:[{t:"上楼，去 403",to:"d_door"}]
+},
+"p_road_back":{
+  ch:"序章",title:"回头",
+  text:`你转过身。
+
+梧桐道还在，但尽头不是校门——是另一栋宿舍楼。
+
+你走回去。楼牌上是"三号宿舍楼"。
+
+你又走回来。楼牌还是"三号宿舍楼"。
+
+你掏出手机想导航，屏幕上显示：
+
+<span class="r">定位中……定位失败。当前位置：未知。</span>
+
+电量从 68% 掉到了 12%。
+
+你深吸一口气，往唯一亮着灯的方向走去。`,
+  choices:[{t:"走向灯光",to:"p_road2",san:-12,set:{lostOnce:true}}]
+},
+"p_road3":{
+  ch:"序章",title:"第 12 页",
+  text:`你翻开手册第 12 页。
+
+分配表还在。
+
+但你的名字下面，多了一行手写的字，墨迹还没干透：
+
+<span class="r">"别数了。"</span>
+
+你猛地合上手册，四下张望。
+
+没有人。
+
+梧桐道上，只有你一个人，和满地一片都没落的绿叶。`,
+  choices:[{t:"快步走向四号楼",to:"p_road2",san:-8}]
+},
+
+/* ═══════════════ 寝室篇 ═══════════════ */
+
+"d_door":{
+  ch:"寝室",title:"403 门口",
+  text:`四号宿舍楼没有电梯。你爬到四楼，走廊很长，灯是声控的，但你每走一步，灯就灭一盏，在你身后。
+
+走廊尽头，403。
+
+门是暗红色的，和手册封面一样的颜色。门上贴着一张 A4 纸，边角已经卷起，纸上的字是打印的：
+
+<span class="r">【403 寝室规则】</span>
+
+你正要细看，门从里面打开了。
+
+一个高个子女生探出头，咧嘴一笑："哟，最后一个到了！快进来快进来。"
+
+她身后，另外两个人正围着桌子收拾东西。`,
+  choices:[
+    {t:"先进门，打招呼",to:"d_enter"},
+    {t:"先看完门上的规则",to:"d_rules",set:{sawRules:true}},
+    {t:"站在门口，先观察一下寝室里面",to:"d_observe",san:-4}
+  ]
+},
+
+"d_observe":{
+  ch:"寝室",title:"观察",
+  text:`你没有立刻进门，而是站在门口往里看。
+
+寝室是标准的四人间。但靠窗的位置，摆着三张床。
+
+三张。
+
+你数了两遍。三张床，三张书桌，三个衣柜。
+
+可门上的牌子写着"403 · 四人间"。
+
+那个高个子女生顺着你的目光看过去，笑容僵了一下，然后很快恢复：
+
+"哦，第四张床啊……上学期拆了。快进来吧，别在门口站着。"
+
+她说"上学期拆了"，可这栋楼今年才第一次住新生。`,
+  choices:[
+    {t:"进门",to:"d_enter",set:{knows3beds:true}},
+    {t:"问她：这楼今年才启用吧？",to:"d_ask_floor",san:-6,set:{knows3beds:true}}
+  ]
+},
+"d_ask_floor":{
+  ch:"寝室",title:"追问",
+  text:`"这楼……不是今年才第一次住人吗？"
+
+空气安静了两秒。
+
+高个子女生脸上的笑慢慢收了。她侧过身，让开门口，用一种很轻的声音说：
+
+"你挺聪明的。"
+
+"聪明人在 403 活不长。"
+
+她顿了顿，又说：
+
+"但也可能活得最长。进来吧，把门关上。门一定要关严。"
+
+你进了门。门在你身后"咔哒"一声合上。`,
+  choices:[{t:"和室友互相认识",to:"d_meet",set:{smart:true}}]
+},
+
+"d_enter":{
+  ch:"寝室",title:"403 室内",
+  text:`你拖着箱子进了门。
+
+寝室比想象中要旧。墙皮有些发黄，靠门那面墙上贴着一张泛黄的纸，被胶带压得严严实实。
+
+高个子女生拍了拍你的肩膀："我叫苏也，体院的，你叫我椰子就行。"
+
+戴眼镜的女生从书堆里抬起头，推了推眼镜："李薇，中文系。"
+
+靠窗坐着的第三个人没说话。她穿着一件洗得发白的灰T恤，正低头擦一双很旧的布鞋。
+
+苏也咳了一声："那是陈默，她不爱说话，你别介意。"
+
+陈默忽然抬起头，看了你一眼。
+
+那一眼很平，但你莫名觉得——她在确认什么。`,
+  choices:[
+    {t:"主动跟陈默打招呼",to:"d_meet_chen"},
+    {t:"先看看门后的那张纸",to:"d_rules",set:{sawRules:true}},
+    {t:"先收拾自己的东西",to:"d_meet",set:{quiet:true}}
+  ]
+},
+"d_meet_chen":{
+  ch:"寝室",title:"陈默",
+  text:`"你好，我叫……"
+
+"我知道你叫什么。"陈默打断你，"门上的名单我看了。"
+
+她放下手里的布鞋，抬头：
+
+"我只说一遍。"
+
+"这个寝室有七条规矩。晚上十一点前必须回来。熄灯后不要照镜子。听到敲门先看猫眼。有人叫你名字，叫一次别应，叫两次别应，叫三次必须应。"
+
+"还有——"
+
+她指了指门后那张纸。
+
+"自己看。看完记住。记不住的话，别怪我。"`,
+  choices:[
+    {t:"去看门后的纸",to:"d_rules",set:{sawRules:true,chenTrust:1}},
+    {t:"问她：那第七条呢？",to:"d_chen_7",san:-5,set:{chenTrust:1}}
+  ]
+},
+"d_chen_7":{
+  ch:"寝室",title:"第七条",
+  text:`"第七条是什么？"你问。
+
+陈默沉默了很久。
+
+"第七条是——"
+
+苏也突然大声咳嗽起来，李薇的书"啪"地掉在地上。
+
+陈默闭上嘴，重新低下头擦鞋，好像什么都没发生。
+
+过了一会儿，她用几乎听不见的声音说：
+
+"第七条，不能说出来。"
+
+"说出来就不灵了。"`,
+  choices:[
+    {t:"去看门后的纸",to:"d_rules",set:{sawRules:true,chenTrust:2}}
+  ]
+},
+"d_meet":{
+  ch:"寝室",title:"三个人",
+  text:`你选了个靠门的位置，把行李放下。
+
+苏也很热情，一直在讲学校的各种传闻：哪个食堂的阿姨会多给你一勺，哪个澡堂的热水要等十分钟，哪栋楼晚上会"多出一个人"。
+
+"不过你别信那些啊，"她哈哈笑，"都是学姐吓唬新生的。"
+
+李薇推了推眼镜，小声说："我信。"
+
+"去年有个学姐，在图书馆待到闭馆，第二天就没来上课。"
+
+"后来呢？"
+
+"后来……"李薇顿了一下，"后来她的名字出现在借书卡的最后一栏。借阅日期是明年。"`,
+  choices:[
+    {t:"问李薇：借书卡是什么？",to:"d_liwei"},
+    {t:"去门后看那张纸",to:"d_rules",set:{sawRules:true}},
+    {t:"先睡觉，太累了",to:"d_firstnight"}
+  ]
+},
+"d_liwei":{
+  ch:"寝室",title:"借书卡",
+  text:`"图书馆的旧书，最后一页会贴一张借书卡。"李薇说，"借过的人会在上面签名。"
+
+"我上个月借了一本《临江校志》，最后一栏的签名是——"
+
+她掏出手机，翻出一张照片。
+
+照片上，借书卡的最后一行写着：
+
+<span class="r">姓名：李薇　借阅日期：2025年10月14日　归还日期：——</span>
+
+"今天是九月八号。"李薇说。
+
+"我还没借过那本书。"`,
+  choices:[
+    {t:"把照片删了，别想了",to:"d_rules",set:{sawRules:true,liweiCard:true}},
+    {t:"问她还不还那本书",to:"d_liwei2",san:-7,set:{liweiCard:true}}
+  ]
+},
+"d_liwei2":{
+  ch:"寝室",title:"空的",
+  text:`"因为还没还。"李薇说。
+
+她把手机收起来，笑了笑，那个笑很难看。
+
+"我一直在想，如果我十月十四号那天不去图书馆，是不是就不会还了。"
+
+"可是昨天，我发现我的书包里多了一本书。"
+
+她从桌肚里抽出一本深蓝色的硬皮书，封面已经磨得看不清字。
+
+"《临江校志》，1999 年版。"
+
+"我从来没借过它。"`,
+  choices:[
+    {t:"让她把书扔了",to:"d_rules",set:{sawRules:true,liweiCard:true}},
+    {t:"接过那本书翻一翻",to:"d_book_open",san:-10,set:{liweiCard:true,hasBook:true}}
+  ]
+},
+"d_book_open":{
+  ch:"寝室",title:"校志",
+  text:`你接过书。
+
+书很沉，比看上去要沉得多。
+
+你翻开目录页，第一条就是：
+
+<span class="r">第四节 · 四号宿舍楼 403 寝室历任住户名录（1987—）</span>
+
+你往下看。
+
+名单很长，一年一行。每一行最后都标着两个字：
+
+1987　张××　【毕业】
+1988　李××　【毕业】
+1989　王××　【毕业】
+1990　——　<span class="r">【缺】</span>
+1991　刘××　【毕业】
+
+一直翻到最后一页。
+
+2025 年的那一行，已经印好了三个名字：
+
+<span class="g">苏也　李薇　陈默</span>
+
+第四格是空白的。
+
+但空白处有一道很浅的铅笔印，像是有人先写了又擦掉。
+
+你凑近了看，勉强认出两个字的轮廓——
+
+<span class="r">是你自己的名字。</span>`,
+  choices:[
+    {t:"合上书，什么都不说",to:"d_rules",san:-12,set:{sawRules:true,hasBook:true,sealName:true}},
+    {t:"问李薇：这书我能留着吗？",to:"d_rules",san:-8,set:{sawRules:true,hasBook:true}}
+  ]
+},
+
+"d_rules":{
+  ch:"寝室",title:"403 寝室规则",
+  text:`你凑近门后那张泛黄的纸。
+
+纸上的字是打印的，但边角有许多手写补充，字迹各不相同，显然是一届一届留下来的。
+
+<span class="r">【403 寝室规则】</span>
+
+一、每晚 23:00 前必须回到寝室。23:00 后走廊的灯会熄灭，如果你还在外面，请<b>不要</b>回头确认身后有没有人。
+
+二、22:30 熄灯后，<b>任何人不得照镜子</b>。包括手机屏幕的反光。
+
+三、如听到敲门声，先看猫眼。若猫眼外一片漆黑（即使走廊有灯），<b>不要开门</b>，也不要出声。
+
+四、若室友在半夜叫你的名字：<b>叫一次不要应，叫两次不要应，叫三次必须应</b>。
+
+五、拖鞋不要摆成"八"字，鞋尖统一朝门。
+
+六、<b>不要在寝室里说"我想回家"。</b>
+
+七、<span class="g">本条内容已被人为涂抹，无法辨认。</span>
+
+最下方，有一行用红笔写的、字迹很新的补充：
+
+<span class="r">"如果半夜醒来，发现寝室里多了一张床——请立刻闭眼装睡，直到天亮。无论听到什么。"</span>`,
+  choices:[
+    {t:"用手机把规则拍下来",to:"d_rules_photo",set:{hasRules:true}},
+    {t:"问苏也：第七条到底是什么？",to:"d_rules_q7",set:{hasRules:true}},
+    {t:"记住，然后去睡觉",to:"d_firstnight",set:{hasRules:true}}
+  ]
+},
+"d_rules_photo":{
+  ch:"寝室",title:"拍照",
+  text:`你掏出手机，对着规则拍了一张。
+
+闪光灯亮起的一瞬间，整张纸上的字全部变成了红色，像是被血浸透。
+
+你眨了眨眼。再看时，照片里只有一张空白的墙。
+
+你回头看向门后——规则还在，字还在。
+
+但第七条那行涂抹的痕迹，似乎淡了一点。
+
+隐约能看见第一个字：
+
+<span class="r">"不"</span>`,
+  choices:[
+    {t:"不再深究，去睡觉",to:"d_firstnight",set:{hasRules:true}},
+    {t:"伸手去抠那层涂抹",to:"d_rules_scratch",san:-10,set:{hasRules:true}}
+  ]
+},
+"d_rules_scratch":{
+  ch:"寝室",title:"涂抹",
+  text:`你的指甲刚碰到纸面，陈默的手就扣住了你的手腕。
+
+她的力气大得惊人。
+
+"别碰。"
+
+"上一届有个学姐，就是这么碰的。"
+
+"然后呢？"
+
+"然后她成了第七条。"
+
+陈默松开手，退回自己的床位。
+
+"规矩不是用来研究的，"她说，"是用来活的。"`,
+  choices:[
+    {t:"道歉，去睡觉",to:"d_firstnight",set:{hasRules:true,chenTrust:3}},
+    {t:"追问她：第七条到底写了什么？",to:"d_chen_7",set:{hasRules:true}}
+  ]
+},
+"d_rules_q7":{
+  ch:"寝室",title:"问苏也",
+  text:`"椰子，第七条是什么？"
+
+苏也正在铺床，动作停了一下。
+
+"我哪知道。"她笑笑，"我来的时候那行就被涂了。"
+
+"那你不好奇？"
+
+"好奇啊。"她把被子抖开，"好奇的人，都在楼下的公告栏上。"
+
+"什么公告栏？"
+
+"一楼门口那个。"苏也背对着你，"你去看看就知道了。上面贴的都是'违纪学生通报'。"
+
+"不过你注意，那些通报的日期，全是<span class="r">同一天</span>。"`,
+  choices:[
+    {t:"下楼去看公告栏",to:"d_notice",san:-6,set:{hasRules:true}},
+    {t:"不去了，先睡觉",to:"d_firstnight",set:{hasRules:true}}
+  ]
+},
+"d_notice":{
+  ch:"寝室",title:"一楼公告栏",
+  text:`你找了个借口下楼。
+
+一楼门口的公告栏上，果然贴满了通报。纸都黄了，最上面一张是新的。
+
+<span class="r">【违纪学生通报】</span>
+经查，以下同学于 10 月 14 日 23:00 后在宿舍楼外逗留，予以通报批评：
+
+张××　李××　王××　刘××　陈××　……
+
+名单很长。你一行一行往下看。
+
+每一张通报的日期都是 10 月 14 日。
+
+最早的一张是 1987 年，最新的一张是去年。
+
+而每一张名单的最后一个名字，都是同一个：
+
+<span class="g">"第 4 届 · 无名"</span>
+
+你正看着，头顶的灯"啪"地灭了。
+
+走廊里，传来脚步声。
+
+一步一步，从楼梯口往你这边来。`,
+  choices:[
+    {t:"立刻跑回 403",to:"d_run_back",san:-8},
+    {t:"站在原地不动，屏住呼吸",to:"d_stand_still",san:-14}
+  ]
+},
+"d_run_back":{
+  ch:"寝室",title:"回寝",
+  text:`你转身就跑。
+
+楼梯很长。你跑了一层又一层，跑到腿发软，终于看见"四楼"的牌子。
+
+你冲进走廊，冲到 403 门口，推门进去，反手把门摔上。
+
+三个人都被你吓了一跳。
+
+"你干嘛去了？"苏也问。
+
+你喘着气，说不出话。
+
+陈默坐在床上，看着你，慢慢地说：
+
+"你数楼梯了吗？"
+
+你愣住了。
+
+刚才，你跑的时候……好像真的在心里数了。
+
+一、二、三、四……
+
+你数到几了？`,
+  choices:[
+    {t:"我数了，但我不记得数到几",to:"d_n1_count",san:-12,set:{counted:true}},
+    {t:"我没数",to:"d_firstnight",set:{lied:true}}
+  ]
+},
+"d_n1_count":{
+  ch:"寝室",title:"数到几",
+  text:`"我数了。"你说，"但我不记得数到几。"
+
+寝室里安静下来。
+
+陈默站起来，从自己枕头底下摸出一样东西，塞进你手里。
+
+是一枚铜钱，用红绳系着，边缘磨得发亮。
+
+"戴着。"她说，"睡觉也别摘。"
+
+"这能挡什么？"
+
+"挡不了什么。"陈默躺回床上，背对着你，"只是让你下次数的时候，数得慢一点。"
+
+"慢一点，就来得及停下。"`,
+  choices:[
+    {t:"戴上铜钱，去睡觉",to:"d_firstnight",set:{hasCoin:true,chenTrust:3}}
+  ]
+},
+"d_stand_still":{
+  ch:"寝室",title:"站着",
+  text:`你站住不动，屏住呼吸。
+
+脚步声越来越近，停在你身后大约三步远的地方。
+
+你能闻到一股很淡的、潮湿的霉味，像放了很久的旧书。
+
+"……你也是新生？"
+
+一个很轻的声音问。
+
+你没有回答。
+
+"你几班的？"
+
+还是没有回答。
+
+沉默了几秒，那个声音叹了口气：
+
+"别数楼梯。"
+
+脚步声远去。走廊尽头的灯重新亮起。
+
+你转过身。公告栏上，多了一张新的通报。
+
+上面写着你的名字。
+
+日期是——10 月 14 日。`,
+  choices:[
+    {t:"撕掉那张通报",to:"d_tear",san:-10},
+    {t:"冲回寝室",to:"d_run_back2",san:-8}
+  ]
+},
+"d_tear":{
+  ch:"寝室",title:"撕",
+  text:`你伸手去撕那张通报。
+
+纸很脆，一撕就碎。
+
+但在你撕开的地方，底下还贴着一张——一模一样的通报，一模一样的名字。
+
+再撕，还有一张。
+
+再撕，还有。
+
+你停下动作，往后退了一步。
+
+整块公告栏上密密麻麻贴满了几百张通报，每一张上面都是你的名字。
+
+你转身跑上楼。
+
+回到 403 时，你的手还在抖。
+
+陈默看了你一眼，什么都没问，只是把一枚铜钱放在你桌上。
+
+"戴着。"她说。`,
+  choices:[
+    {t:"戴上铜钱，睡觉",to:"d_firstnight",set:{hasCoin:true,chenTrust:2}}
+  ]
+},
+"d_run_back2":{
+  ch:"寝室",title:"回寝",
+  text:`你转身冲上楼梯，一口气跑回四楼，推门进了 403。
+
+三个人都还醒着。
+
+"你脸色好差。"李薇说。
+
+你张了张嘴，最后还是没说公告栏的事。
+
+陈默从枕头底下摸出一枚铜钱，放在你桌上。
+
+"戴着。"
+
+"为什么？"
+
+"因为你在楼下站了超过十秒。"她说，"能站着回来的，都该戴着。"`,
+  choices:[
+    {t:"戴上铜钱，睡觉",to:"d_firstnight",set:{hasCoin:true,chenTrust:3}}
+  ]
+},
+
+"d_firstnight":{
+  ch:"寝室",title:"第一夜 · 23:00",
+  text:`22:40，李薇关了灯。
+
+四个人各自躺下。黑暗里，能听见彼此均匀的呼吸声。
+
+你睡不着。
+
+你盯着天花板，脑子里全是手册上的规则、楼下的公告栏、还有那个空的第四张床的位置。
+
+墙上的挂钟滴答滴答地走。
+
+23:00。
+
+钟声敲响的一瞬间，走廊里的灯全灭了。你听见远处传来"啪"的一声，接着是第二声、第三声——那是整栋楼的灯，一层一层地灭下去。
+
+然后，你听见了脚步声。
+
+就在门外。
+
+<span class="r">咚。咚。咚。</span>`,
+  choices:[
+    {t:"装睡，什么都不做",to:"d_knock_ignore"},
+    {t:"轻手轻脚下床，去看猫眼",to:"d_knock_peek",set:{sawRules:true}},
+    {t:"直接开门",to:"d_knock_open",danger:true}
+  ]
+},
+
+"d_knock_ignore":{
+  ch:"寝室",title:"装睡",
+  text:`你闭上眼睛，把被子拉到下巴。
+
+敲门声持续了大约一分钟。
+
+然后停了。
+
+走廊里安静得可怕，静到你能听见自己的心跳。
+
+就在你以为结束的时候——
+
+门外传来一个女生的声音，很轻，很温柔：
+
+"同学，我的钥匙掉了，能帮我开下门吗？"
+
+"我就住隔壁 404。"
+
+那声音听起来那么正常，那么真实。你几乎要坐起来了。
+
+这时，对面床铺的陈默忽然翻了个身，用很轻很轻的声音说：
+
+"别动。"
+
+"404 是杂物间。"`,
+  choices:[
+    {t:"继续装睡",to:"d_knock_ignore2",set:{chenTrust:3}},
+    {t:"起身开门",to:"d_knock_open",danger:true}
+  ]
+},
+"d_knock_ignore2":{
+  ch:"寝室",title:"她走了",
+  text:`你一动不动。
+
+门外安静了很久。
+
+久到你几乎要睡着了。
+
+然后你听见那个女生的声音贴着门缝，几乎是贴着你的耳朵说：
+
+"好的，那你明天再来找我。"
+
+脚步声远去。
+
+你睁开眼。黑暗中，你看见门缝底下塞进来一张纸条。
+
+第二天早上，你把纸条捡起来。上面只有一行字：
+
+<span class="r">"10 月 14 日，图书馆见。"</span>
+
+你把纸条揉成一团扔进垃圾桶。等你洗漱回来，垃圾桶里空空如也。
+
+纸条不见了。
+
+而你的枕头底下，多了一张一模一样的。`,
+  choices:[
+    {t:"把纸条烧掉",to:"d_n2_start",san:-8,set:{gotNote:true}},
+    {t:"留着纸条",to:"d_n2_start",set:{gotNote:true,keepNote:true}}
+  ]
+},
+
+"d_knock_peek":{
+  ch:"寝室",title:"看猫眼",
+  text:`你悄悄下床，赤脚踩在冰凉的地板上。
+
+猫眼在门正中，大约齐你眼睛的高度。
+
+你踮起脚，凑过去。
+
+猫眼外面——
+
+<span class="r">一片漆黑。</span>
+
+黑得不像话。走廊的声控灯虽然灭了，但窗外应该有月光。可猫眼里什么都没有，就是纯粹的黑，像是有人用黑布把整个猫眼糊住了。
+
+你正要退开，那片黑暗里忽然睁开了一只眼睛。
+
+它正在看你。
+
+你猛地后退，撞到了身后的椅子。
+
+门外，响起一个女人的笑声，很低，很轻，像从很远的地方传来。`,
+  choices:[
+    {t:"退回床上，装睡",to:"d_knock_peek2",san:-12,set:{sawEye:true}},
+    {t:"喊苏也起来",to:"d_wake_suye",san:-8,set:{sawEye:true}}
+  ]
+},
+"d_knock_peek2":{
+  ch:"寝室",title:"退回去",
+  text:`你几乎是滚回床上的，把被子蒙过头顶。
+
+门外安静了。
+
+你听着自己的心跳，一下，一下，慢慢地平复下来。
+
+过了很久，你听见陈默在黑暗里开口：
+
+"你看了猫眼？"
+
+你"嗯"了一声。
+
+"看见眼睛了？"
+
+"……看见了。"
+
+"那就好。"陈默说，"看见了，说明它只是想看看你。"
+
+"如果猫眼外面是亮着的，那才麻烦。"
+
+"为什么？"
+
+"因为那说明它已经进来了，正站在门里面看你。"`,
+  choices:[
+    {t:"不敢再睡，睁眼到天亮",to:"d_n2_start",san:-6,set:{sawEye:true}},
+    {t:"强迫自己睡觉",to:"d_n2_start",set:{sawEye:true}}
+  ]
+},
+"d_wake_suye":{
+  ch:"寝室",title:"叫醒苏也",
+  text:`"椰子！椰子！"
+
+你伸手去推苏也的床。被子是软的，手伸进去，摸到一个硬邦邦的东西。
+
+你缩回手。
+
+苏也不在床上。
+
+她的被子被叠得整整齐齐，枕头摆得方方正正——就像她根本没有睡过。
+
+你环顾寝室。
+
+李薇的床，被子也叠着。
+
+陈默的床……陈默坐在床上，睁着眼睛看你。
+
+"她们都出去了。"她说。
+
+"去哪儿了？"
+
+"去找门了。"
+
+"什么门？"
+
+"你敲的那扇门。"
+
+你僵硬地转过头。
+
+403 的门，不知道什么时候——打开了。
+
+门外面不是走廊。
+
+是黑的。纯粹的，什么都没有的黑。`,
+  choices:[
+    {t:"立刻去把门关上",to:"d_close_door",san:-14},
+    {t:"站在原地，等陈默说话",to:"d_wait_chen",san:-10}
+  ]
+},
+"d_close_door":{
+  ch:"寝室",title:"关门",
+  text:`你冲到门口，双手抓住门把手，用力往回拉。
+
+门很沉。非常沉。像是有几百斤的东西卡在门缝里。
+
+你咬着牙，一点一点把门拉回来。
+
+就在门快要合上的一瞬间，黑暗里伸出一只手，抓住了门框。
+
+是一只很白的手，指甲修剪得干干净净，指节上戴着一枚银戒指。
+
+你看见那只手的主人——深蓝色外套。
+
+她抬头看你，笑了笑。
+
+"不好意思，"她说，"我找 403。"
+
+你没有回答。你用尽全身力气，把门摔上了。
+
+"砰。"
+
+你靠在门上滑坐下来，喘着粗气。
+
+再抬头时，苏也和李薇都躺在床上，睡得很熟。
+
+被子没有叠。
+
+一切正常。
+
+只有门板上，多了一个淡淡的手印。`,
+  choices:[
+    {t:"回到床上，天亮再说",to:"d_n2_start",san:-10,set:{metBlue:true}}
+  ]
+},
+"d_wait_chen":{
+  ch:"寝室",title:"等",
+  text:`你站在原地，没有动。
+
+陈默看了你很久，然后慢慢躺下。
+
+"聪明。"
+
+"如果你刚才去关门，你就会看见她。"
+
+"看见她会怎样？"
+
+"她会跟你打招呼。"陈默闭上眼睛，"被她打过招呼的人，都活不到期末。"
+
+门"咔哒"一声，自己关上了。
+
+寝室恢复了原样。苏也和李薇在床上睡着，呼吸均匀。
+
+你低头看自己的手——手心全是冷汗。
+
+而那枚铜钱，正在你胸口发烫。`,
+  choices:[
+    {t:"躺下，天亮再说",to:"d_n2_start",san:-5,set:{chenTrust:4}}
+  ]
+},
+
+"d_knock_open":{
+  ch:"寝室",title:"开门",
+  text:`你伸手拧开了门锁。
+
+门开了一条缝。
+
+走廊里没有人。
+
+灯是灭的，但月光从窗户照进来，把地面照成一片惨白。
+
+你探头往外看。
+
+走廊尽头，站着一个人。
+
+她背对着你，穿着深蓝色外套。
+
+听见开门声，她开始转身——
+
+<span class="r">一点一点地，从肩膀开始。</span>`,
+  choices:[
+    {t:"立刻关门",to:"d_slam",san:-15},
+    {t:"看清楚她是谁",to:"e_blue",san:-40}
+  ]
+},
+"d_slam":{
+  ch:"寝室",title:"砰",
+  text:`你用尽全力把门摔上。
+
+"砰！"
+
+门板震得你虎口发麻。
+
+你反锁，挂上链子，靠在门上大口喘气。
+
+身后，苏也被吵醒了。
+
+"你干嘛呢……"
+
+"外面有人！"你压着嗓子说。
+
+苏也揉着眼睛坐起来："谁啊？"
+
+"穿深蓝色外套的！"
+
+苏也的动作僵住了。
+
+黑暗里，李薇的声音也很轻地响起：
+
+"我们学校，没有深蓝色外套的校服。"
+
+三个人都没再说话。
+
+陈默翻了个身，说：
+
+"睡吧。明天去买把锁。"`,
+  choices:[
+    {t:"睡下，等天亮",to:"d_n2_start",san:-8,set:{metBlue:true}}
+  ]
+},
+
+"d_n2_start":{
+  ch:"寝室",title:"第二天 · 清晨",
+  text:`你几乎整夜没睡。
+
+闹钟响的时候，天已经蒙蒙亮。窗外有鸟叫，走廊里有拖把拖地的声音，隔壁传来洗漱的水声。
+
+一切都正常得不像话。
+
+苏也伸着懒腰坐起来："走啊，去吃早饭！"
+
+李薇已经穿好衣服，正对着镜子整理领子。
+
+镜子。
+
+你猛地想起规则第二条：<span class="r">熄灯后不得照镜子</span>。
+
+现在是早上，应该没问题。
+
+但你还是注意到，李薇照镜子的时候，镜中的她，慢了半拍才抬起头。`,
+  choices:[
+    {t:"提醒李薇别照镜子",to:"d_warn_liwei",set:{warned:true}},
+    {t:"不说，先去洗漱",to:"d_morning"},
+    {t:"检查一下自己的镜子",to:"d_check_mirror",san:-6}
+  ]
+},
+"d_warn_liwei":{
+  ch:"寝室",title:"提醒",
+  text:`"李薇，规则上说……"
+
+"我知道。"李薇打断你，扶了扶眼镜，"早上没关系的。"
+
+"可是——"
+
+"昨天我梦见我站在镜子前面，"李薇说，"镜子里的我问我要不要换。"
+
+"换什么？"
+
+"换个位置。"
+
+李薇笑了一下，那个笑很累。
+
+"我没答应。"她说，"但今天早上照镜子的时候，我发现我左边的眉毛，比昨天高了一点点。"
+
+"就一点点。"`,
+  choices:[
+    {t:"拉她离开镜子",to:"d_morning",set:{warned:true,liweiSaved:true}},
+    {t:"让她自己决定",to:"d_morning",san:-5,set:{liweiDoomed:true}}
+  ]
+},
+"d_check_mirror":{
+  ch:"寝室",title:"镜子",
+  text:`你走到镜子前。
+
+镜子里的你，看起来很正常——头发有点乱，眼下有黑眼圈。
+
+你抬手，镜子里的人也抬手。
+
+你歪头，镜子里的人也歪头。
+
+你眨眨眼。
+
+镜子里的人，没有眨。
+
+你盯着镜子，镜子也盯着你。过了大概三秒，镜中的你，才缓慢地、像是想起来一样，眨了一下眼。
+
+你后退一步，撞到了李薇。
+
+"怎么了？"
+
+"没、没事。"
+
+你决定以后尽量不照镜子。`,
+  choices:[
+    {t:"去食堂吃早饭",to:"d_morning",san:-8,set:{mirrorLag:true}}
+  ]
+},
+
+"d_morning":{
+  ch:"寝室",title:"早饭",
+  text:`你们三个——苏也、李薇、你——出了寝室。
+
+陈默没去。她说她不饿，蜷在床上闭着眼。
+
+下楼的时候，你特意数了一下台阶。
+
+从四楼到一楼，三段楼梯，每段十二级，一共三十六级。
+
+很正常。
+
+你松了口气。
+
+食堂在宿舍楼东边，走五分钟。路上，苏也一直在讲笑话，李薇偶尔搭一句，你笑不出来。
+
+到了食堂门口，你看见门口贴着一张通知：
+
+<span class="r">【通知】今日食堂供应：早餐 三样。午餐 三样。晚餐 三样。</span>
+
+下面有人用马克笔加了一行：
+
+<span class="g">"多出来的那一样，别拿。"</span>`,
+  choices:[
+    {t:"进食堂吃饭",to:"c_enter"},
+    {t:"不吃了，直接去教学楼",to:"t_enter"},
+    {t:"回寝室找陈默聊聊",to:"d_chen_talk"}
+  ]
+},
+"d_chen_talk":{
+  ch:"寝室",title:"陈默",
+  text:`你折回寝室。
+
+陈默还躺在床上，背对着门，像是睡着了。
+
+你在自己床沿坐下。
+
+"陈默。"
+
+"嗯。"
+
+"你到底知道多少？"
+
+沉默了很久。
+
+"比你多。"她说，"比她们多。"
+
+"你为什么不走？"
+
+"走不了。"陈默翻过身，看着天花板，"我大一的时候，也想过退学。"
+
+"我去教务处递申请，那个老师看了我一眼，说：'你确定？'"
+
+"我说确定。"
+
+"她就把一本册子推到我面前，让我签字。"
+
+"我签了。"
+
+"然后呢？"
+
+"然后我醒来的时候，还躺在 403 的床上。"陈默说，"签到表的日期是——我入学的第一天。"`,
+  choices:[
+    {t:"问她：那本册子叫什么？",to:"d_chen_book",san:-8,set:{chenTrust:4}},
+    {t:"不问了，去上课",to:"t_enter",set:{chenTrust:2}}
+  ]
+},
+"d_chen_book":{
+  ch:"寝室",title:"那本册子",
+  text:`"那本册子叫什么名字？"
+
+陈默看着你，很久。
+
+"《临江大学 · 新生手册》。"
+
+你愣住了。你从包里掏出自己那本。
+
+封皮深红，烫金的数字——403。
+
+"我那本上面，印的是 402。"陈默说。
+
+"402 寝室，三年前就不住人了。"
+
+"因为那一年，402 的四个学生，全都没毕业。"
+
+"教务处说她们转学了。"
+
+"但我在图书馆的旧报纸上，看见过一条消息。"
+
+陈默顿了顿。
+
+"1987 年 10 月 14 日，四号宿舍楼 402 寝室，四名学生失踪。"`,
+  choices:[
+    {t:"问她：为什么是 10 月 14 日？",to:"d_oct14",san:-10,set:{chenTrust:5,knowsOct14:true}},
+    {t:"沉默着离开，去上课",to:"t_enter",san:-6,set:{knowsOct14:true}}
+  ]
+},
+"d_oct14":{
+  ch:"寝室",title:"10 月 14 日",
+  text:`"为什么是 10 月 14 日？"
+
+陈默坐起来，从枕头底下抽出一样东西。
+
+是一张日历，撕下来的，边缘毛糙。
+
+日期：<span class="r">10 月 14 日</span>。
+
+"每年这一天，学校会少一个人。"她说，"有时候是学生，有时候是老师。"
+
+"少的那个人，会被写进《临江校志》。"
+
+"写在哪一页？"
+
+"写在第 403 页。"
+
+陈默把日历塞回枕头底下。
+
+"今天是 9 月 8 日。"她说，"你还有 36 天。"`,
+  choices:[
+    {t:"把这件事记在心里，去上课",to:"t_enter",set:{knowsOct14:true,chenTrust:5}},
+    {t:"问她：怎么才能活下来？",to:"d_howlive",san:-8,set:{knowsOct14:true}}
+  ]
+},
+"d_howlive":{
+  ch:"寝室",title:"怎么活",
+  text:`"怎么才能活下来？"
+
+陈默沉默了很久，久到你以为她不会回答了。
+
+"三个条件。"她说。
+
+"第一，永远不要在 23:00 后出门。"
+
+"第二，找到那本 1999 年版的《临江校志》，把第 403 页撕下来。"
+
+"第三——"
+
+她停住了。
+
+"第三是什么？"
+
+"第三，你得在 10 月 14 日那天，找到一个愿意替你签字的人。"
+
+"签什么字？"
+
+"《新生手册》最后一页的空白处。"陈默说，"那一页，一直都在。"
+
+你翻开自己的手册，翻到最后一页。
+
+果然是空白的。
+
+但空白纸的正中央，有一个很浅很浅的凹痕。
+
+像是有人曾经在那里，用力写过字。`,
+  choices:[
+    {t:"合上手册，去上课",to:"t_enter",set:{knowsOct14:true,chenTrust:5,rule3:true}}
+  ]
+},
+
+/* ═══════════════ 食堂篇 ═══════════════ */
+
+"c_enter":{
+  ch:"食堂",title:"第一食堂",
+  text:`食堂里人很多，但没有人大声说话。
+
+你端着餐盘走到窗口。玻璃后面，三个大盆里分别盛着：炒青菜、土豆丝、红烧肉。
+
+正好三样。
+
+打菜的阿姨戴着白帽子，帽檐压得很低，看不清脸。
+
+"同学，要哪个？"
+
+"都要。"
+
+她舀菜的时候，你注意到她的手在抖。
+
+不是因为老，是因为她在数。
+
+她每舀一勺，都会轻轻数一声。
+
+"一。"
+
+"二。"
+
+"三。"
+
+轮到红烧肉时，她舀了满满一勺，然后又补了一小块。
+
+你听见她极轻地说了句：
+
+"……四。"
+
+她抬起头，帽子下面，是一张很年轻的脸。
+
+她在看你。
+
+然后她把那块肉，又舀了回去。`,
+  choices:[
+    {t:"假装没看见，端着餐盘走开",to:"c_sit"},
+    {t:"小声问她：为什么数？",to:"c_ask_aunt",san:-8},
+    {t:"把红烧肉倒回去，重新打",to:"c_redo",san:-5}
+  ]
+},
+"c_ask_aunt":{
+  ch:"食堂",title:"阿姨",
+  text:`"阿姨，"你压低声音，"为什么要数？"
+
+她的手停住了。
+
+"你听见了？"
+
+"嗯。"
+
+她左右看了一眼，然后飞快地从围裙口袋里掏出一样东西，隔着窗口塞给你。
+
+是一张折叠的餐巾纸。
+
+"别看。"她说，"回寝室再看。"
+
+"还有——今天不要吃红烧肉。"
+
+"为什么？"
+
+"因为今天不是三样。"她把帽子往下压了压，"今天，是四样。"`,
+  choices:[
+    {t:"把餐巾纸收好，端着餐盘走开",to:"c_sit",set:{hasNapkin:true}},
+    {t:"现在就看",to:"c_read_napkin",san:-10,set:{hasNapkin:true}}
+  ]
+},
+"c_read_napkin":{
+  ch:"食堂",title:"餐巾纸",
+  text:`你打开餐巾纸。
+
+里面用圆珠笔写了一行很小的字：
+
+<span class="r">"第四样菜，是用失踪的人做的。"</span>
+
+<span class="r">"每年 10 月 14 日，食堂会加一道菜。"</span>
+
+<span class="r">"不要吃。"</span>
+
+<span class="r">"如果你吃了，你就会变成下一年的第四样。"</span>
+
+最后还有一行，字迹不一样，明显是另一个人写的：
+
+<span class="g">"我吃了。我在 403 等你。"</span>
+
+你猛地抬头。
+
+窗口后面，那个阿姨已经不见了。
+
+取而代之的是一个穿深蓝色外套的女人。
+
+她对着你，慢慢露出一个微笑。`,
+  choices:[
+    {t:"扔下餐盘就跑",to:"c_run",san:-12},
+    {t:"站着不动，看着她",to:"c_stare",san:-15}
+  ]
+},
+"c_run":{
+  ch:"食堂",title:"跑",
+  text:`你扔下餐盘，转身就跑。
+
+身后没有人追。食堂里所有人都停下筷子，抬起头，看着你。
+
+她们的脸，都是模糊的。
+
+你冲出食堂大门，扑倒在台阶上。
+
+阳光很好。梧桐叶绿得发亮。
+
+你喘着气回头。食堂里，一切正常。有人在吃饭，有人在聊天。
+
+窗口后面，是那个戴白帽子的阿姨。
+
+她隔着玻璃，对你摇了摇头。
+
+像是在说：<span class="r">别跑，会引人注意。</span>`,
+  choices:[
+    {t:"去教学楼上课",to:"t_enter",san:-8}
+  ]
+},
+"c_stare":{
+  ch:"食堂",title:"对视",
+  text:`你没有跑。
+
+你站在原地，隔着玻璃，看着她。
+
+她笑了。
+
+然后她抬起手，指了指你胸口的位置。
+
+你低头。
+
+你胸前的铜钱，正在发烫。
+
+再抬头时，窗口后面恢复如常。白帽子的阿姨还在打菜，一切正常。
+
+只有你自己知道，刚才那一瞬间，食堂里所有的声音都消失了。
+
+包括你自己的心跳。
+
+它停了整整两秒。`,
+  choices:[
+    {t:"去教学楼",to:"t_enter",san:-12,set:{heartStopped:true}}
+  ]
+},
+"c_redo":{
+  ch:"食堂",title:"重新打",
+  text:`"阿姨，我不要红烧肉，重新打一份。"
+
+阿姨看了你一眼。
+
+"确定？"
+
+"确定。"
+
+她把那块补上的肉夹了回去，然后重新舀了一勺。
+
+这次，只有一勺。
+
+"好孩子。"她小声说，"少一样，就少一样。"
+
+"什么？"
+
+"少一样，你就少一样麻烦。"她把餐盘推给你，"记住，今天只吃三样。以后每天都只吃三样。"
+
+你端着餐盘走开。身后，你听见她又在轻轻数：
+
+"一。二。三。"
+
+"……四。"
+
+你回头。窗口后面空无一人。`,
+  choices:[
+    {t:"找位置坐下吃饭",to:"c_sit",set:{auntieFriend:1}}
+  ]
+},
+"c_sit":{
+  ch:"食堂",title:"吃饭",
+  text:`你找了个靠窗的位置坐下。
+
+苏也和李薇已经在那儿了。苏也正在狼吞虎咽，李薇小口小口地扒着饭。
+
+"你怎么才来？"苏也嘴里塞满了饭。
+
+"没事。"
+
+你低头吃饭。青菜有点咸，土豆丝没炒熟，红烧肉……你没要。
+
+吃到一半，你听见隔壁桌两个女生在小声说话。
+
+"你听说了吗，今年 403 又住满四个人了。"
+
+"不是说只安排三个吗？"
+
+"对啊，所以第四张床是空的。"
+
+"那……那张床是给谁的？"
+
+"给那个'名额'啊。"
+
+"什么名额？"
+
+"每年 10 月 14 日，学校要交一个人的。"女生压低了声音，"403 年年都是最后一个满的。"
+
+"因为 403 的那个人，是自己走进去的。"`,
+  choices:[
+    {t:"继续吃饭，装作没听见",to:"c_after"},
+    {t:"起身去问那两个女生",to:"c_ask_girls",san:-8},
+    {t:"放下筷子，立刻回寝室",to:"d_back_dorm"}
+  ]
+},
+"c_ask_girls":{
+  ch:"食堂",title:"两个女生",
+  text:`你端着餐盘走过去。
+
+"同学，你们刚才说的'名额'，是什么意思？"
+
+两个女生同时抬起头。
+
+她们长得一模一样。
+
+"你听错了。"左边那个说。
+
+"我们什么都没说。"右边那个说。
+
+然后她们同时低头，继续吃饭。
+
+你站在原地，愣了几秒。
+
+你注意到，她们餐盘里的菜——是四样。
+
+而她们吃饭的动作，也一模一样。
+
+每一口，都是同时送进嘴里，同时咀嚼，同时咽下。
+
+你退回到自己的座位。`,
+  choices:[
+    {t:"快点吃完，去上课",to:"c_after",san:-8}
+  ]
+},
+"c_after":{
+  ch:"食堂",title:"饭后",
+  text:`你吃完饭，把餐盘放到回收处。
+
+回程的路上，苏也接了个电话，说是篮球队有事，先走了。李薇说要去图书馆查点资料。
+
+只剩你一个人。
+
+你站在食堂门口，看着校园。
+
+阳光正好，梧桐叶绿得发亮，有学生在草坪上坐着看书，有人在远处打球。
+
+一切都那么正常。
+
+正常得让你觉得，昨晚发生的一切，是不是自己的幻觉。
+
+你摸了摸胸口。
+
+铜钱还在，还是温的。`,
+  choices:[
+    {t:"去教学楼，看看课表",to:"t_enter"},
+    {t:"去图书馆，找李薇",to:"l_enter"},
+    {t:"回寝室，休息一下",to:"d_back_dorm"},
+    {t:"去操场走走",to:"m_playground"}
+  ]
+},
+
+"d_back_dorm":{
+  ch:"寝室",title:"回寝",
+  text:`你回到 403。
+
+陈默还在。她正坐在桌前，用一支很旧的钢笔，在一张纸上写字。
+
+"你回来了。"她没抬头。
+
+"嗯。"
+
+"吃了几样？"
+
+"三样。"
+
+"好。"她放下笔，"记住，以后每天都三样。"
+
+"如果有一天你数出四样，"她抬起头看着你，"那就当天不要再吃东西。"
+
+"饿着，也比变成菜好。"`,
+  choices:[
+    {t:"问她纸上写的是什么",to:"d_chen_paper",san:-6},
+    {t:"躺下休息一会儿",to:"d_rest"}
+  ]
+},
+"d_chen_paper":{
+  ch:"寝室",title:"纸上的字",
+  text:`你凑过去看。
+
+纸上写的是一串名字，密密麻麻，至少有几十个。
+
+每个名字后面，都画了一个符号。
+
+有的画了"√"，有的画了"×"，有的画了一个圈。
+
+最后一个名字后面，什么都没画。
+
+"这是什么？"
+
+"403 住过的人。"陈默说。
+
+"√ 是毕业的，× 是失踪的，圈是——"
+
+"圈是什么？"
+
+"圈是还在的。"陈默把纸折起来，"比如我。"
+
+"那最后一个呢？"
+
+陈默看了你一眼。
+
+"最后一个，是还没有结果的。"`,
+  choices:[
+    {t:"不问了，躺下休息",to:"d_rest",san:-6,set:{chenTrust:5}},
+    {t:"问她：我能不能看看那张纸？",to:"d_chen_paper2",san:-8}
+  ]
+},
+"d_chen_paper2":{
+  ch:"寝室",title:"名单",
+  text:`陈默把纸递给你。
+
+你一行行往下看。名字很多，年份从 1987 一直到 2025。
+
+你注意到，1987 年那一届，四个人名后面全是"×"。
+
+1990 年那一届，只有一个人，后面是"√"，其他三个是"×"。
+
+"1990 年那个毕业的人，"你问，"是怎么毕业的？"
+
+陈默沉默了很久。
+
+"她找了个替身。"
+
+"什么？"
+
+"《新生手册》最后一页，签字。"陈默说，"只要你让别人签了字，那一年的名额就归他。"
+
+"那个替她签字的人呢？"
+
+"被写进了《临江校志》第 403 页。"
+
+"然后呢？"
+
+"然后就成了图书馆里的一本书。"陈默说，"一本没有人会借的书。"`,
+  choices:[
+    {t:"把名单还给她，躺下休息",to:"d_rest",san:-10,set:{knowsSubstitute:true}}
+  ]
+},
+"d_rest":{
+  ch:"寝室",title:"午睡",
+  text:`你躺下，闭上眼睛。
+
+很累，但睡不着。
+
+迷迷糊糊中，你听见有人在说话。声音很远，像是从水底传来的。
+
+"……又一个。"
+
+"……第几个了？"
+
+"……第 4 个。"
+
+"……第 4 个总是最麻烦的。"
+
+"……为什么？"
+
+"……因为第 4 个，是'名额'。"
+
+你猛地睁开眼。
+
+寝室里空无一人。陈默不在了，桌上那张纸也不在了。
+
+窗外，太阳已经偏西。
+
+你看了一眼手机。下午四点。
+
+你睡了整整三个小时。
+
+但你完全不记得自己睡着过。`,
+  choices:[
+    {t:"起身，去找陈默",to:"d_find_chen",san:-6},
+    {t:"去教学楼，看看情况",to:"t_enter"}
+  ]
+},
+"d_find_chen":{
+  ch:"寝室",title:"找陈默",
+  text:`你出了寝室，在走廊里转了一圈。
+
+四楼没有。三楼没有。二楼没有。
+
+你回到四楼的时候，看见陈默站在楼梯口，背对着你，正低头看着什么。
+
+"陈默？"
+
+她转过身。
+
+她手里拿着一枚铜钱，和你胸前那枚一模一样。
+
+"你醒了。"她说，"正好。"
+
+"你刚才去哪了？"
+
+"去楼下还东西。"
+
+"还什么？"
+
+"上一个人的铜钱。"陈默把那枚铜钱收进口袋，"她昨天晚上，把名字签在了手册上。"
+
+"所以她把铜钱还回来了。"`,
+  choices:[
+    {t:"问她：那个人是谁？",to:"d_who_signed",san:-10},
+    {t:"不问了，去教学楼",to:"t_enter",san:-5}
+  ]
+},
+"d_who_signed":{
+  ch:"寝室",title:"签字的人",
+  text:`"谁？"
+
+陈默看着你，很久。
+
+"你昨天在食堂，有没有看见一个女生？"
+
+"很多女生。"
+
+"穿白裙子的，坐在最角落。"
+
+你想了想。昨天在食堂，你确实看见过一个穿白裙子的女生，独自坐在角落里，面前摆着四样菜。
+
+她一直在笑。
+
+"她昨天晚上，签了。"陈默说。
+
+"签给谁？"
+
+"签给了一个穿深蓝色外套的女人。"
+
+"然后呢？"
+
+"然后她今天早上，成了图书馆的一本书。"陈默顿了顿，"一本叫《白裙》的书。"`,
+  choices:[
+    {t:"去图书馆，看看那本书",to:"l_white_dress",san:-8,set:{knowsWhite:true}},
+    {t:"不去，去教学楼",to:"t_enter"}
+  ]
+},
+
+/* ═══════════════ 教学楼篇 ═══════════════ */
+
+"t_enter":{
+  ch:"教学楼",title:"西侧教学楼",
+  text:`下午四点，你来到教学楼。
+
+楼很旧，比宿舍楼还旧。外墙爬满了爬山虎，绿得发黑。正门上方挂着一块牌子：
+
+<span class="g">临江大学 · 西教学楼（1—12 层）</span>
+
+牌子下面，有人用粉笔写了一行小字：
+
+<span class="r">"13 楼不存在。"</span>
+
+你推门进去。
+
+大厅很空，只有一部电梯，和两侧的楼梯。
+
+电梯的楼层按钮，从 1 排到 12。
+
+最上面那个按钮的位置，有一个很淡的凹痕——像是曾经有过第 13 个按钮，后来被抹掉了。`,
+  choices:[
+    {t:"坐电梯上楼",to:"t_elevator"},
+    {t:"走楼梯",to:"t_stairs"},
+    {t:"先在大厅看看公告栏",to:"t_board"}
+  ]
+},
+"t_board":{
+  ch:"教学楼",title:"公告栏",
+  text:`大厅左侧有一块公告栏。
+
+最上面贴着一张课程表，是给大一新生的：
+
+<span class="g">周一 1-2 节　高等数学　301
+周一 3-4 节　大学物理　302
+周二 1-2 节　思想道德与法治　403</span>
+
+你盯着最后一行。
+
+403。
+
+教学楼也有 403。
+
+你继续往下看。课程表最下面，有一行加粗的字：
+
+<span class="r">"本学期所有课程，均在 23:00 前结束。若你在 23:00 后仍听到下课铃，请留在原地，闭眼，默数六十下。"</span>
+
+和手册上写的一样。`,
+  choices:[
+    {t:"坐电梯上楼",to:"t_elevator"},
+    {t:"走楼梯",to:"t_stairs"}
+  ]
+},
+"t_elevator":{
+  ch:"教学楼",title:"电梯",
+  text:`电梯门开了。
+
+里面的灯是暖黄色的，镜子擦得很亮，映出你的样子。
+
+你走进去，按下"3"。
+
+门关上。
+
+电梯开始上行。显示屏上的数字：1……2……3……
+
+"叮。"
+
+门开了。外面是走廊，灯很亮，一切都正常。
+
+但你没有动。
+
+因为电梯里的显示屏，还在跳。
+
+3……4……5……6……
+
+电梯没有停。
+
+它继续往上，7、8、9、10、11、12。
+
+然后——13。
+
+"叮。"
+
+门开了。
+
+门外不是走廊。
+
+门外，是一间教室。教室的门牌上写着：
+
+<span class="r">13</span>`,
+  choices:[
+    {t:"立刻按关门键",to:"t_elev_close",san:-8},
+    {t:"走出电梯，看看那间教室",to:"t_13f",san:-15},
+    {t:"站在原地，闭上眼默数六十下",to:"t_elev_count"}
+  ]
+},
+"t_elev_close":{
+  ch:"教学楼",title:"关门",
+  text:`你疯狂地按关门键。
+
+门缓缓合上。就在最后一道缝隙要消失的时候，一只手伸了进来。
+
+是刚才电梯镜子里——你自己的手。
+
+你后退一步，撞在电梯壁上。
+
+门又开了。
+
+门外还是那间教室。教室里坐满了人，全都背对着门，低着头，一动不动。
+
+讲台上站着一个老师。
+
+她转过身来，看着你，笑了笑。
+
+"同学，"她说，"你迟到了。"
+
+"快找个位置坐下。"`,
+  choices:[
+    {t:"冲出去，从楼梯下楼",to:"t_elev_escape",san:-15},
+    {t:"走进去坐下",to:"t_13f_class",san:-20},
+    {t:"按下所有楼层按钮",to:"t_elev_all",san:-12}
+  ]
+},
+"t_elev_all":{
+  ch:"教学楼",title:"所有按钮",
+  text:`你想起手册第二条：<span class="r">若你在电梯中看到"13"，请立刻按下所有按钮，并在最近的楼层离开。</span>
+
+你伸手，把 1 到 12 的按钮全部按了下去。
+
+电梯开始乱颤。显示屏上的数字疯狂跳动：13、12、7、2、9、13、13、13……
+
+门猛地打开。
+
+外面是 3 楼。走廊正常，灯正常，有人走过。
+
+你冲了出去。
+
+电梯门在你身后关上。
+
+你回头，看见电梯里的镜子里，还站着一个人——她还在电梯里，对着你挥手。
+
+那个人，是你自己。`,
+  choices:[
+    {t:"不去上课了，回寝室",to:"d_back_dorm",san:-12,set:{leftSelf:true}},
+    {t:"硬着头皮去找 301 教室",to:"t_hall"}
+  ]
+},
+"t_elev_escape":{
+  ch:"教学楼",title:"逃生",
+  text:`你从电梯里冲出来，冲进那间教室旁边的消防通道。
+
+楼梯。
+
+你往下跑。一层，两层，三层。
+
+跑到第四层的时候，你停下来。
+
+因为你看见，楼梯间的墙上写着"13"。
+
+你继续往下跑。
+
+五层、六层、七层。
+
+墙上写的是"13"。
+
+你跑了很久，跑到腿都在抖。
+
+墙上还是"13"。`,
+  choices:[
+    {t:"停下，靠着墙喘气",to:"t_stairs_stuck",san:-18},
+    {t:"闭上眼睛，继续跑",to:"t_stairs_blind",san:-14}
+  ]
+},
+"t_stairs_blind":{
+  ch:"教学楼",title:"闭眼",
+  text:`你闭上眼睛，扶着扶手，继续往下走。
+
+不看楼层号，不看墙。
+
+一步、两步、三步。
+
+你数着台阶。每段十二级。
+
+数到第三十六级的时候，你听见前面有人说话。
+
+"同学。"
+
+你睁开眼。
+
+是保安。她站在一楼大厅里，看着你。
+
+"你怎么从楼梯间出来的？"
+
+"我……"
+
+"楼梯间三点半就锁了。"保安说，"你怎么进去的？"
+
+你回头。楼梯间的门是关着的，上面挂着一把锈迹斑斑的锁。`,
+  choices:[
+    {t:"说自己是走错了",to:"t_hall",san:-10},
+    {t:"问保安：这栋楼有 13 层吗？",to:"t_ask_guard",san:-8}
+  ]
+},
+"t_ask_guard":{
+  ch:"教学楼",title:"保安",
+  text:`"师傅，这栋楼有 13 层吗？"
+
+保安看了你一眼。
+
+"没有。"
+
+"可我刚才——"
+
+"没有。"她打断你，"你记错了。"
+
+她顿了顿，又说：
+
+"丫头，我在这栋楼看了二十年门。"
+
+"每年都有学生跑来问我这个问题。"
+
+"你知道她们后来怎么样了吗？"
+
+"怎么样了？"
+
+"她们都变成了我的问题。"保安说，"因为每年 10 月 14 日之后，我就得重新记一遍这栋楼有多少层。"`,
+  choices:[
+    {t:"道谢离开，去找教室",to:"t_hall",san:-8}
+  ]
+},
+"t_stairs_stuck":{
+  ch:"教学楼",title:"卡住",
+  text:`你靠着墙，慢慢滑坐下来。
+
+腿已经不听使唤了。
+
+你掏出手机，想打电话。屏幕上显示：<span class="r">无服务</span>。
+
+时间：23:47。
+
+不可能。你明明是下午四点进来的。
+
+你抬起头。楼梯间的墙上，"13"那个数字，正在慢慢往下淌。
+
+不是油漆。
+
+是血。
+
+你听见楼上传来下课铃的声音。
+
+<span class="r">叮铃铃铃铃——</span>
+
+你想起手册第一条：<span class="r">若你在 23:00 后仍听到下课铃，请留在原地，闭眼，默数六十下。</span>`,
+  choices:[
+    {t:"闭眼，开始数",to:"t_count60",san:-10},
+    {t:"捂住耳朵，往楼下冲",to:"t_charge",san:-20}
+  ]
+},
+"t_count60":{
+  ch:"教学楼",title:"六十下",
+  text:`你闭上眼。
+
+"一。"
+
+"二。"
+
+"三。"
+
+你数得很慢。每数一下，铃声就轻一点。
+
+"……四十。"
+
+"……五十。"
+
+"……五十九。"
+
+"六十。"
+
+你睁开眼。
+
+楼梯间的灯亮着，墙上干干净净，没有"13"，也没有血。
+
+你的手机显示：下午 4 点 12 分。
+
+你只进来了十二分钟。
+
+你站起来，腿还有点软，但能走。
+
+你推开楼梯间的门，回到一楼大厅。
+
+保安看了你一眼，什么都没说。`,
+  choices:[
+    {t:"上楼去找 301 教室",to:"t_hall",set:{counted60:true}},
+    {t:"直接离开教学楼",to:"t_leave"}
+  ]
+},
+"t_charge":{
+  ch:"教学楼",title:"冲",
+  text:`你捂住耳朵，往楼下冲。
+
+楼梯在你脚下不断延伸，永远没有尽头。
+
+你跑了很久，跑到肺里像着了火。
+
+然后你听见一个声音，就在你耳边：
+
+"别跑了。"
+
+"你已经跑到第 13 层了。"
+
+你停下脚步。
+
+抬头。
+
+楼梯间上方，写着"13F"。
+
+你明明一直在往下跑。`,
+  choices:[
+    {t:"转身往上跑",to:"e_13f_end",san:-30},
+    {t:"坐下来，等天亮",to:"t_wait_dawn",san:-20}
+  ]
+},
+"t_wait_dawn":{
+  ch:"教学楼",title:"等天亮",
+  text:`你坐下来，抱着膝盖，闭上眼睛。
+
+不知道过了多久。
+
+你听见有人叫你的名字。
+
+"同学，同学？"
+
+你睁开眼。
+
+天亮了。阳光从楼梯间的窗户照进来，灰尘在光柱里飘。
+
+一个清洁工阿姨正站在你面前，手里拿着拖把。
+
+"你怎么睡在这儿啊？"
+
+你站起来，腿麻得几乎摔倒。
+
+"我……"
+
+"快去吧，"阿姨说，"上课要迟到了。"
+
+你走出楼梯间。大厅里，学生们来来往往。
+
+一切正常。
+
+只是你注意到，你的影子比别人的，淡了一点点。`,
+  choices:[
+    {t:"去上课",to:"t_hall",san:-15,set:{faded:true}}
+  ]
+},
+
+"t_13f":{
+  ch:"教学楼",title:"13 楼",
+  text:`你走出了电梯。
+
+走廊很长，两边都是教室。教室门上的牌子依次是：1301、1302、1303……
+
+走廊尽头，有一间教室，门开着。
+
+你走过去，站在门口。
+
+教室里坐满了学生，全都背对着你，一动不动。
+
+黑板上写着板书：
+
+<span class="g">第 13 讲 · 如何成为别人</span>
+
+讲台上，老师转过身来。
+
+她穿着深蓝色的外套。
+
+"欢迎。"她说，"这是我们班今年的第四个学生。"
+
+"请坐。"`,
+  choices:[
+    {t:"转身就跑",to:"t_13f_run",san:-20},
+    {t:"走进去，找个位置坐下",to:"t_13f_class",san:-25},
+    {t:"问她：前三个是谁？",to:"t_13f_ask",san:-18}
+  ]
+},
+"t_13f_ask":{
+  ch:"教学楼",title:"前三个",
+  text:`"前三个是谁？"
+
+老师笑了。
+
+"你自己看。"
+
+她抬手一指。
+
+教室里的学生，一个一个地转过头来。
+
+第一张脸，是苏也。
+
+第二张脸，是李薇。
+
+第三张脸，是陈默。
+
+她们三个都在笑，笑得很正常，正常到诡异。
+
+"她们昨天就来了。"老师说，"今天是她们第一天上课。"
+
+"你要不要坐她们旁边？"
+
+"那里有个空位。"`,
+  choices:[
+    {t:"转身就跑",to:"t_13f_run",san:-25},
+    {t:"走向那个空位",to:"e_13f_end",san:-30}
+  ]
+},
+"t_13f_run":{
+  ch:"教学楼",title:"跑",
+  text:`你转身就跑。
+
+走廊比来时更长。你跑过 1303、1302、1301……但数字不是变小的。
+
+1303、1304、1305。
+
+1306、1307、1308。
+
+数字在变大。
+
+走廊尽头，是 1313 教室。
+
+门开着。
+
+里面坐满了人。
+
+你回头，身后也是 1313。
+
+你被包围了。`,
+  choices:[
+    {t:"闭上眼睛，往一个方向冲",to:"t_13f_blind",san:-20},
+    {t:"推门进 1313",to:"e_13f_end",san:-30}
+  ]
+},
+"t_13f_blind":{
+  ch:"教学楼",title:"冲",
+  text:`你闭上眼，朝一个方向拼命跑。
+
+风在耳边呼啸。
+
+你听见很多声音在喊你，有苏也的、李薇的、陈默的，还有你自己的。
+
+你没有停下。
+
+不知道跑了多久，你撞上了一扇门。
+
+门开了。
+
+你摔在地上。
+
+睁开眼，你在一楼大厅。阳光从门口照进来。
+
+保安站在你旁边，低头看着你。
+
+"同学，你没事吧？"
+
+"我……没事。"
+
+"你刚才在这儿转圈转了十分钟。"保安说，"一直闭着眼睛。"`,
+  choices:[
+    {t:"道谢，离开教学楼",to:"t_leave",san:-15,set:{survived13:true}},
+    {t:"问她：现在几点？",to:"t_ask_time",san:-10}
+  ]
+},
+"t_ask_time":{
+  ch:"教学楼",title:"几点",
+  text:`"师傅，现在几点？"
+
+保安看了看表。
+
+"下午四点十二。"
+
+你愣了一下。
+
+你进教学楼的时候，也是四点。
+
+"怎么了？"
+
+"没什么。"
+
+你走出教学楼。
+
+外面的天，还是下午四点的天。太阳挂在西边，一寸都没动。
+
+你看着手机上的时间。
+
+16:12。
+
+16:12。
+
+16:12。
+
+秒针在走，但分钟不动。
+
+你站在教学楼门口的台阶上，站了很久。
+
+直到太阳终于动了一格。`,
+  choices:[
+    {t:"回寝室",to:"d_back_dorm",san:-12,set:{timeStuck:true}},
+    {t:"去图书馆",to:"l_enter",san:-8}
+  ]
+},
+"t_13f_class":{
+  ch:"教学楼",title:"坐下",
+  text:`你走进教室，在最后一排找了个空位坐下。
+
+椅子是凉的。
+
+你环顾四周，教室里大约坐了三十个人，全都低着头，看不见脸。
+
+老师开始讲课。
+
+"今天讲第一章，如何替换一个人。"
+
+"替换的关键，是名字。"
+
+"名字是唯一的锚点。只要你把别人的名字，写在自己的位置上，你就是她。"
+
+她在黑板上写下三个字。
+
+是你的名字。
+
+"这位同学，"她看向你，"请你上来，把你的名字擦掉。"
+
+"然后，写上别人的。"
+
+全班三十个人，同时抬起了头。`,
+  choices:[
+    {t:"站起来，冲上讲台把黑板砸了",to:"t_smash",san:-25},
+    {t:"站起来，往外跑",to:"t_13f_run",san:-22},
+    {t:"坐着不动",to:"e_13f_end",san:-30}
+  ]
+},
+"t_smash":{
+  ch:"教学楼",title:"砸",
+  text:`你冲上讲台，抓起黑板擦，用力砸向黑板。
+
+"哗啦——"
+
+黑板碎了。
+
+碎片飞溅，教室里响起一片尖叫——但那些声音不像是人发出来的，更像是纸张被撕裂。
+
+教室开始崩塌。
+
+墙皮剥落，露出后面的砖。砖缝里塞满了纸，一张一张，密密麻麻。
+
+每一张纸上，都写着一个名字。
+
+你看见了很多熟悉的名字。
+
+你甚至看见了——你自己的。
+
+天花板塌下来。
+
+你眼前一黑。`,
+  choices:[
+    {t:"……",to:"t_wake_floor",san:-15}
+  ]
+},
+"t_wake_floor":{
+  ch:"教学楼",title:"醒来",
+  text:`你睁开眼。
+
+你躺在教学楼一楼的大厅地板上。
+
+天花板上是完好的灯。地板是干净的大理石。
+
+保安蹲在你旁边，手里拿着一瓶水。
+
+"醒了？"
+
+"我……"
+
+"你在电梯里睡着了。"保安说，"电梯卡在 4 楼和 5 楼之间，我们把你弄出来的。"
+
+"你睡了两个小时。"
+
+你坐起来，摸了摸口袋。
+
+手册还在。铜钱还在。
+
+只是封皮上烫金的"403"，变成了"404"。`,
+  choices:[
+    {t:"离开教学楼，回寝室",to:"d_back_dorm",san:-10,set:{book404:true}},
+    {t:"问保安：我进过 13 楼吗？",to:"t_ask_guard",san:-8}
+  ]
+},
+
+"t_stairs":{
+  ch:"教学楼",title:"楼梯",
+  text:`你决定走楼梯。
+
+楼梯间很窄，墙是绿色的，漆掉了一半。
+
+你开始往上走。
+
+第一段，十二级。
+
+转角。
+
+第二段，十二级。
+
+转角。
+
+第三段，十二级。
+
+转角。
+
+第四段——
+
+你停住了。
+
+从一楼到二楼，应该只有两段楼梯。
+
+你退回去，数了一遍。
+
+第一段，十二级。
+
+第二段，十二级。
+
+第三段，十二级。
+
+第四段，十二级。
+
+你抬头，楼层牌上写着"2F"。
+
+你站在四段楼梯的中间，进退不得。`,
+  choices:[
+    {t:"原路返回一楼",to:"t_back_down",san:-8},
+    {t:"继续往上走",to:"t_up_more",san:-12},
+    {t:"闭上眼睛，原地默数六十下",to:"t_count60b"}
+  ]
+},
+"t_back_down":{
+  ch:"教学楼",title:"返回",
+  text:`你转身往回走。
+
+第一段，十二级。
+
+第二段，十二级。
+
+第三段，十二级。
+
+第四段，十二级。
+
+你回到了"1F"。
+
+但你记得，你上来的时候，也是四段。
+
+你站在一楼，看着楼梯间。
+
+楼梯间里，隐隐约约传来脚步声。
+
+有人正在往下走。
+
+一步，一步，很慢。
+
+你退到大厅。大厅里空无一人。`,
+  choices:[
+    {t:"坐电梯（明知道危险）",to:"t_elevator",san:-10},
+    {t:"直接离开教学楼",to:"t_leave",set:{fledStairs:true}}
+  ]
+},
+"t_up_more":{
+  ch:"教学楼",title:"继续",
+  text:`你继续往上走。
+
+第五段，十二级。
+
+第六段，十二级。
+
+第七段，十二级。
+
+楼层牌上的数字开始变化：2F、3F、4F、5F……
+
+你一直走到"12F"。
+
+然后是第十三段楼梯。
+
+楼梯尽头，是一扇门。
+
+门上贴着一张纸，纸上写着：
+
+<span class="r">"如果你数到了这里，说明你已经数不清了。"</span>
+
+<span class="r">"请原路返回，并且忘掉你数到的数字。"</span>
+
+<span class="r">"如果你还记得——"</span>
+
+<span class="g">"那就进来吧。"</span>`,
+  choices:[
+    {t:"原路返回",to:"t_back_down",san:-15},
+    {t:"推开门",to:"e_13f_end",san:-30}
+  ]
+},
+"t_count60b":{
+  ch:"教学楼",title:"数",
+  text:`你闭上眼睛，开始数。
+
+一、二、三……
+
+数到三十的时候，你听见楼梯间里有什么东西在爬。
+
+数到四十的时候，那个东西经过了你身边。
+
+数到五十的时候，你感觉到有冰凉的东西碰了碰你的手。
+
+数到六十。
+
+你睁开眼。
+
+你站在一楼大厅。楼梯间恢复了正常，两段楼梯，通向二楼。
+
+只是你的左手背上，多了一个很淡的印记。
+
+像是被谁的手指，按了一下。`,
+  choices:[
+    {t:"上楼，去找教室",to:"t_hall",san:-8,set:{marked:true}},
+    {t:"离开教学楼",to:"t_leave"}
+  ]
+},
+
+"t_hall":{
+  ch:"教学楼",title:"三楼走廊",
+  text:`你来到三楼。
+
+走廊很长，两侧都是教室。教室门牌从 301 一直排到 312。
+
+你注意到一件事。
+
+<span class="r">奇数号的教室，门都是开着的。偶数号的教室，门都是关着的。</span>
+
+301 开着。302 关着。
+
+303 开着。304 关着。
+
+305 开着。306 关着。
+
+你要找的教室是——`,
+  choices:[
+    {t:"去 301",to:"t_room301"},
+    {t:"去 302",to:"t_room302",danger:true},
+    {t:"先看看 302 里面",to:"t_peek302",san:-6}
+  ]
+},
+"t_peek302":{
+  ch:"教学楼",title:"302 的窗户",
+  text:`你走到 302 门口，透过门上的小窗往里看。
+
+教室里坐着人。满满当当，一个空位都没有。
+
+但她们的头，全都朝着同一个方向——黑板。
+
+黑板上什么都没写。
+
+你就这样看了几秒。
+
+然后，最前排的一个女生，缓缓地转过头来。
+
+她看着你，嘴唇动了动。
+
+你没有听见声音，但你读出了她的口型：
+
+<span class="r">"别进来。"</span>
+
+然后她又转了回去，就像什么都没发生。`,
+  choices:[
+    {t:"去 301",to:"t_room301",set:{warned302:true}},
+    {t:"硬着头皮推开 302 的门",to:"t_room302",danger:true}
+  ]
+},
+"t_room302":{
+  ch:"教学楼",title:"302 教室",
+  text:`你推开了 302 的门。
+
+门轴发出"吱呀"一声。
+
+教室里，三十多个人同时转过头来。
+
+她们的脸——都是你的脸。
+
+每一个都长得一模一样。每一个都在笑。
+
+"你来了。"最前排的那个说，"我们等你好久了。"
+
+"我们就是你，你就是我们。"
+
+"坐下吧，今天是你的第一堂课。"
+
+讲台上，老师敲了敲黑板。
+
+"今天讲，如何变成一个人。"
+
+"第一步，先杀死你自己。"`,
+  choices:[
+    {t:"转身夺门而出",to:"t_escape302",san:-20},
+    {t:"站在原地，闭上眼睛",to:"t_302_close",san:-15},
+    {t:"坐下",to:"e_replace",san:-40}
+  ]
+},
+"t_escape302":{
+  ch:"教学楼",title:"逃出 302",
+  text:`你转身拉门。
+
+门把手不见了。门板上只有一片平滑的木头。
+
+你用手拍，用拳头砸，用肩膀撞。
+
+身后，脚步声越来越近。
+
+"别怕。"那些声音说，"我们只是想让你留下来。"
+
+"留下来，成为我们。"
+
+你闭上眼，用尽全力，撞向门板。
+
+"砰！"
+
+你摔在走廊的地板上。
+
+门在你身后关上了。
+
+走廊里，301 的门还开着。302 的门关得严严实实，门上什么痕迹都没有。`,
+  choices:[
+    {t:"进 301 教室",to:"t_room301",san:-15},
+    {t:"直接下楼离开",to:"t_leave",san:-12}
+  ]
+},
+"t_302_close":{
+  ch:"教学楼",title:"闭眼",
+  text:`你闭上眼睛，站在原地。
+
+你听见那些声音在你耳边说话，越来越近，越来越响。
+
+"睁开眼看看我们。"
+
+"看看你自己。"
+
+你没有睁眼。
+
+你开始数数。
+
+一、二、三……
+
+数到二十的时候，声音开始变远。
+
+数到四十的时候，周围一片安静。
+
+数到六十的时候，你睁开了眼。
+
+教室里空无一人。黑板上写着一行字：
+
+<span class="r">"你很聪明。"</span>
+
+<span class="r">"下次可没这么容易了。"</span>`,
+  choices:[
+    {t:"离开教室，去 301",to:"t_room301",san:-10,set:{smart:true}}
+  ]
+},
+"t_room301":{
+  ch:"教学楼",title:"301 教室",
+  text:`301 教室里坐了不少人，都是新生。
+
+你在后排找了个位置坐下。
+
+讲台上，一个年轻女老师正在讲课。她看起来很疲惫，眼下有很重的黑眼圈。
+
+"……所以，洛必达法则的适用条件是……"
+
+很正常的高数课。
+
+你松了口气，翻开课本。
+
+这时，老师忽然停下讲课，看向窗外。
+
+窗外，天已经黑了。你记得你进来的时候，还是下午四点。
+
+她看了看表，皱了皱眉。
+
+"同学们，"她说，"今天提前下课。"
+
+"现在，请大家排好队，一个跟一个，从楼梯下楼。"
+
+"不要坐电梯。"
+
+"不要回头。"
+
+"不要数台阶。"`,
+  choices:[
+    {t:"跟着大家一起走",to:"t_eva_teach"},
+    {t:"问老师：发生什么事了？",to:"t_ask_teacher",san:-6},
+    {t:"趁乱溜去别的楼层",to:"t_sneak",san:-10}
+  ]
+},
+"t_ask_teacher":{
+  ch:"教学楼",title:"老师",
+  text:`"老师，出什么事了？"
+
+老师看了你一眼。她的眼睛很红。
+
+"你是 403 的？"
+
+你愣住了。
+
+"你怎么知道？"
+
+"因为只有 403 的人，才会问这种问题。"她苦笑了一下，"每年都问。"
+
+"老师，你也是——"
+
+"我是 1998 级的。"她说，"403，1998 年。"
+
+"那你毕业了吗？"
+
+"我毕业了。"她顿了顿，"但我的名字，还留在这栋楼里。"
+
+"每年的这一天，我都要回来上一节课。"
+
+"上完这节课，我才能再走。"
+
+她看了看表。
+
+"快走吧。还有三分钟。"`,
+  choices:[
+    {t:"跟着大家下楼",to:"t_eva_teach",set:{knowTeacher:true}},
+    {t:"问她：怎么才能彻底离开？",to:"t_teacher_how",san:-8,set:{knowTeacher:true}}
+  ]
+},
+"t_teacher_how":{
+  ch:"教学楼",title:"彻底离开",
+  text:`"怎么才能彻底离开？"
+
+老师沉默了。
+
+"找到你的名字。"她说。
+
+"你的名字被写在这栋楼的某一处。找到它，划掉它。"
+
+"划掉之后，你就自由了。"
+
+"但是——"
+
+"但是什么？"
+
+"但是被你顶替的那个位置，会空出来。"老师说，"然后就会有下一个人，被填进去。"
+
+"就像我当年一样。"
+
+她看了看表，脸色一变。
+
+"快走！"
+
+走廊里的灯，一盏一盏地灭了。`,
+  choices:[
+    {t:"跟着大家一起冲下楼",to:"t_eva_teach",san:-10,set:{knowTeacher:true,nameIdea:true}}
+  ]
+},
+"t_sneak":{
+  ch:"教学楼",title:"溜走",
+  text:`你趁乱溜出教室，往楼上走。
+
+你想去看看四楼。
+
+四楼走廊里，一个人都没有。灯是灭的。
+
+你摸着墙往前走。
+
+走到走廊尽头，你看见一间教室，门牌上写着：
+
+<span class="r">403</span>
+
+教学楼的 403。
+
+门虚掩着。里面透出很微弱的光。`,
+  choices:[
+    {t:"推门进去",to:"t_403_room",san:-12},
+    {t:"转身下楼",to:"t_eva_teach",san:-6}
+  ]
+},
+"t_403_room":{
+  ch:"教学楼",title:"教学楼 403",
+  text:`你推门进去。
+
+教室里只有一张桌子，桌上放着一本很旧的书。
+
+书的封面是深蓝色的，磨得看不清字。
+
+你走过去，翻开。
+
+扉页上写着一行字：
+
+<span class="r">《临江校志》1999 年版</span>
+
+你翻到第 403 页。
+
+第 403 页上，密密麻麻写满了名字。你一眼就看见了陈默的名字，还有苏也、李薇。
+
+你自己的名字也在上面。
+
+但你的名字后面，是空白的。
+
+而别人的名字后面，都写着两个字：
+
+<span class="r">【已签】</span>
+
+书页的右下角，有一行很小的字：
+
+<span class="g">"未签者，即为名额。"</span>`,
+  choices:[
+    {t:"把这一页撕下来",to:"t_tear403",san:-12,set:{hasPage:true}},
+    {t:"合上书，立刻离开",to:"t_eva_teach",san:-8,set:{saw403page:true}}
+  ]
+},
+"t_tear403":{
+  ch:"教学楼",title:"撕页",
+  text:`你抓住第 403 页，用力一撕。
+
+纸很韧，撕得很慢。
+
+撕到一半，你听见一个声音，从书里传出来：
+
+"你确定吗？"
+
+"撕掉这一页，上面所有的名字，都会消失。"
+
+"包括你室友的。"
+
+"包括你的。"
+
+你停住了手。
+
+"你还有三秒钟。"那个声音说。
+
+"三。"
+
+"二。"`,
+  choices:[
+    {t:"继续撕下去",to:"t_tear_done",san:-15,set:{hasPage:true,torePage:true}},
+    {t:"松手，把书合上",to:"t_eva_teach",san:-6,set:{saw403page:true}}
+  ]
+},
+"t_tear_done":{
+  ch:"教学楼",title:"撕下",
+  text:`你撕下了那一页。
+
+教室里所有的光瞬间熄灭。
+
+黑暗中，你听见无数人在叹气。
+
+然后，你听见有人鼓掌。
+
+"很好。"那个声音说，"你做出了选择。"
+
+"现在，你手里拿着的，是这一年的名额。"
+
+"你可以留着它。"
+
+"也可以，把它交给别人。"
+
+你低头看手里的纸。
+
+第 403 页上，所有的名字都在慢慢褪色。
+
+只剩下你自己的名字，还清清楚楚。
+
+纸的边缘，有一行小字：
+
+<span class="g">"在空白处签名，即可转让。"</span>`,
+  choices:[
+    {t:"把纸收起来，下楼",to:"t_eva_teach",set:{hasPage:true,hasQuota:true}},
+    {t:"当场把自己的名字划掉",to:"t_cross_name",san:-15,set:{hasPage:true,hasQuota:true}}
+  ]
+},
+"t_cross_name":{
+  ch:"教学楼",title:"划掉",
+  text:`你掏出笔，把自己的名字用力划掉。
+
+一道，两道，三道。
+
+纸在你手里燃烧起来，蓝色的火，没有温度。
+
+火光中，你看见了很多画面。
+
+你看见 1987 年的四个学生，站在这间教室里。
+
+你看见 1990 年那个毕业的人，把一个女生的名字写在自己的位置上。
+
+你看见陈默坐在 403 的床上，低头擦着一双旧布鞋。
+
+你看见——你自己，在 10 月 14 日的夜里，站在 403 门口。
+
+火灭了。
+
+纸不见了。
+
+教室里空荡荡的，只有你一个人。
+
+窗外，天亮了。`,
+  choices:[
+    {t:"下楼",to:"t_dawn",san:5}
+  ]
+},
+"t_dawn":{
+  ch:"教学楼",title:"天亮",
+  text:`你走出教学楼。
+
+天是灰白色的，像是刚下过雨。空气里有股泥土的味道。
+
+校园里一个人都没有。
+
+你回到宿舍楼，上了四楼，推开 403 的门。
+
+三张床。三个人还在睡。
+
+你走到自己床边，坐下。
+
+枕头底下，有一本深红色的册子。
+
+你翻开最后一页。
+
+空白。
+
+但在纸的中央，那个浅浅的凹痕，变得深了一点。
+
+像是有人已经写过，又擦掉了。`,
+  choices:[
+    {t:"把手册收好，躺下睡觉",to:"e_dawn_mid",set:{freed:true}}
+  ]
+},
+
+"t_eva_teach":{
+  ch:"教学楼",title:"撤离",
+  text:`你跟着队伍下楼。
+
+楼梯间里挤满了人，但没有人说话。所有人都低着头，一个跟一个。
+
+你数了数前面的人。十个。二十个。三十个。
+
+走到二楼的时候，你听见前面有人在小声数：
+
+"一、二、三、四……"
+
+你想起手册上的话：<span class="r">不要在晚上数楼梯。</span>
+
+你想开口提醒，但喉咙发紧。
+
+队伍继续往下走。
+
+走到一楼的时候，你发现前面的人少了一半。
+
+没有人注意到。`,
+  choices:[
+    {t:"装作没看见，走出教学楼",to:"t_leave",san:-10},
+    {t:"大声提醒前面的人别数",to:"t_shout",san:-12}
+  ]
+},
+"t_shout":{
+  ch:"教学楼",title:"喊",
+  text:`"别数了！"
+
+你的声音在楼梯间里回荡。
+
+所有人都停下了脚步。
+
+然后，所有人同时转过头来，看着你。
+
+她们的脸，都是模糊的。
+
+只有一个人是清楚的。
+
+站在队伍最前面，穿着深蓝色外套，正对着你笑。
+
+"谢谢。"她说。
+
+"谢谢你把她们叫停。"
+
+"我本来还在想，怎么才能留住她们。"
+
+你退后一步。
+
+楼梯间的门在你身后，关上了。`,
+  choices:[
+    {t:"闭上眼睛，撞向门",to:"t_break_door",san:-15},
+    {t:"站着不动",to:"e_blue",san:-35}
+  ]
+},
+"t_break_door":{
+  ch:"教学楼",title:"撞",
+  text:`你闭上眼，用尽全身力气撞向门。
+
+"砰！"
+
+门开了。你滚了出去，摔在一楼大厅的地板上。
+
+你爬起来，跑出教学楼。
+
+外面的夜风很凉。你大口喘着气。
+
+回头看去，教学楼里一片漆黑。只有一楼的窗户亮着灯。
+
+窗边站着一个人。
+
+她穿着深蓝色的外套，对你挥了挥手。
+
+然后拉上了窗帘。`,
+  choices:[
+    {t:"跑回寝室",to:"d_back_dorm",san:-15,set:{metBlue:true}}
+  ]
+},
+
+"t_leave":{
+  ch:"教学楼",title:"离开",
+  text:`你走出教学楼。
+
+天已经完全黑了。路灯一盏盏亮起来，把梧桐叶照成暗黄色。
+
+校园里还有零星的人，三三两两。
+
+你看了一眼手机。22:47。
+
+你出来得还算及时。
+
+你加快脚步，往宿舍楼走。
+
+走到一半，你听见身后传来下课铃的声音。
+
+<span class="r">叮铃铃铃铃——</span>
+
+你回头。
+
+教学楼所有的窗户，同时亮了。
+
+每一扇窗户里，都站满了人。
+
+她们都在往下看。
+
+看着你。`,
+  choices:[
+    {t:"立刻闭眼，默数六十下",to:"t_bell_count",san:-8},
+    {t:"跑起来，冲回寝室",to:"t_bell_run",san:-12}
+  ]
+},
+"t_bell_count":{
+  ch:"教学楼",title:"六十下",
+  text:`你闭上眼，站在原地，开始数。
+
+一、二、三……
+
+周围很安静。你能听见自己的呼吸。
+
+数到四十的时候，你听见有人从你身边经过。脚步很轻。
+
+数到五十的时候，你听见有人在你耳边说了一句：
+
+"你数得真慢。"
+
+数到六十。
+
+你睁开眼。
+
+教学楼黑了。窗边没有人。
+
+你继续往宿舍走。
+
+路上，你摸了摸口袋。手册还在。
+
+但你的手背上，刚才那个淡淡的印记，深了一点。`,
+  choices:[
+    {t:"回寝室",to:"d_back_dorm",san:-8,set:{marked:true}}
+  ]
+},
+"t_bell_run":{
+  ch:"教学楼",title:"跑",
+  text:`你转身就跑。
+
+梧桐道上，路灯一盏一盏地在你身后熄灭。
+
+你跑过三号宿舍楼的楼牌。
+
+又跑过三号宿舍楼的楼牌。
+
+又跑过三号宿舍楼的楼牌。
+
+你停下来。
+
+前面还有一块楼牌，写着"三号宿舍楼"。
+
+你深吸一口气，转过身。
+
+身后，也有一块楼牌，写着"三号宿舍楼"。
+
+铃声还在响。
+
+你站在原地，听着铃声，一遍，一遍，一遍。
+
+然后铃声停了。
+
+你面前的路，出现了分岔。
+
+左边通向一栋亮着灯的楼，右边是漆黑一片。`,
+  choices:[
+    {t:"走向左边亮灯的楼",to:"d_back_dorm",san:-10},
+    {t:"走向右边的黑暗",to:"e_dark",san:-25}
+  ]
+},
+
+/* ═══════════════ 图书馆篇 ═══════════════ */
+
+"l_enter":{
+  ch:"图书馆",title:"图书馆",
+  text:`图书馆在校园正中，是一栋很老的三层建筑，红砖墙，拱形窗。
+
+门口立着一块石碑，上面刻着：
+
+<span class="g">"临江大学图书馆 · 建于 1901 年"</span>
+
+石碑下面，有人用刀刻了一行小字：
+
+<span class="r">"不要借第 403 页有名字的书。"</span>
+
+你推门进去。
+
+里面很安静，只有翻书的声音。空气中有股旧纸和灰尘的味道。
+
+前台坐着一个老太太，戴着老花镜，正在整理一摞卡片。
+
+她抬起头，看了你一眼。
+
+"新生？"
+
+"是。"
+
+"手册带来了吗？"
+
+"带了。"
+
+"给我看看。"
+
+你把手册递过去。她翻开封皮，看到那个烫金的"403"，手顿了一下。
+
+然后她在卡片盒里翻找了一会儿，抽出一张卡片，递给你。
+
+"拿着。这是你的借书卡。"
+
+卡片上印着你的名字。
+
+以及一栏：
+
+<span class="r">借阅上限：0 本</span>`,
+  choices:[
+    {t:"问她：为什么是 0 本？",to:"l_ask_card",san:-6},
+    {t:"收下卡片，去书架看看",to:"l_shelf"},
+    {t:"问她：李薇在哪儿？",to:"l_ask_liwei"}
+  ]
+},
+"l_ask_card":{
+  ch:"图书馆",title:"0 本",
+  text:`"为什么是 0 本？"
+
+老太太推了推眼镜。
+
+"因为你的名字还没有落定。"
+
+"什么意思？"
+
+"图书馆的书，每一本都有借书卡。"她说，"借书卡上签名的人，名字就会被记住。"
+
+"名字被记住的人，才能借书。"
+
+"而你的名字——"
+
+她从抽屉里抽出一张纸，摊开。
+
+是一张借书卡，最后一栏空白。
+
+"你的名字，还没有写上去。"
+
+"等你写上去的那天，你就可以借书了。"
+
+"但是——"
+
+她把纸收回去。
+
+"那一天，你也就成了图书馆的书。"`,
+  choices:[
+    {t:"去书架看看",to:"l_shelf",san:-8},
+    {t:"问她：怎么才能避免？",to:"l_ask_avoid",san:-6}
+  ]
+},
+"l_ask_avoid":{
+  ch:"图书馆",title:"避免",
+  text:`"怎么才能避免？"
+
+老太太笑了。她的牙齿很黄。
+
+"很简单。"
+
+"永远不要在这栋楼里，写下你的名字。"
+
+"一个字都不要。"
+
+"包括——"
+
+她指了指你手里的《新生手册》。
+
+"包括那本书的最后一页。"
+
+"那本书，本来就是借书卡。"`,
+  choices:[
+    {t:"把手册收好，去书架",to:"l_shelf",san:-6,set:{knowManual:true}}
+  ]
+},
+"l_ask_liwei":{
+  ch:"图书馆",title:"找李薇",
+  text:`"李薇？中文系那个戴眼镜的？"
+
+"对。"
+
+老太太想了想。
+
+"她刚才来过。"
+
+"现在呢？"
+
+"现在在二楼，中文图书区。"老太太顿了顿，"不过你最好别上去。"
+
+"为什么？"
+
+"因为二楼的中文图书区，正在装修。"
+
+"装修？"
+
+"对。"老太太说，"装修了三年了。"
+
+"那李薇上去干什么？"
+
+"她说，她去找一本 1999 年版的《临江校志》。"`,
+  choices:[
+    {t:"冲上二楼",to:"l_second",san:-8},
+    {t:"先去书架看看",to:"l_shelf"}
+  ]
+},
+"l_second":{
+  ch:"图书馆",title:"二楼",
+  text:`你沿着木楼梯上到二楼。
+
+二楼果然在"装修"。走廊两侧堆满了脚手架和油漆桶，但没有人施工。
+
+中文图书区的门开着。
+
+里面很黑。
+
+你摸索着走进去，喊了一声："李薇？"
+
+没有人回答。
+
+你打开手机手电筒，照了一圈。
+
+书架一排排立着，上面全是灰。
+
+地上，有一副眼镜。
+
+你认得那副眼镜——李薇的。
+
+你捡起来，镜片上有一道裂痕。
+
+镜框内侧，刻着两个字：
+
+<span class="r">"已借"</span>`,
+  choices:[
+    {t:"继续往里面找",to:"l_second_deep",san:-10},
+    {t:"拿着眼镜下楼",to:"l_down_stairs",san:-8}
+  ]
+},
+"l_second_deep":{
+  ch:"图书馆",title:"深处",
+  text:`你继续往里走。
+
+书架上，书的排列开始变得奇怪。
+
+第一排：《临江校志》《临江校志》《临江校志》……
+
+第二排：《临江校志》《临江校志》《临江校志》……
+
+整整一排，全是同一本书。
+
+你抽出其中一本。
+
+深蓝色的封面，磨得看不清字。
+
+你翻开扉页：1999 年版。
+
+你翻到第 403 页。
+
+上面密密麻麻全是名字。
+
+你一行行找。
+
+在最后一栏，你看见了：
+
+<span class="r">李薇　借阅日期：2025 年 10 月 14 日</span>
+
+<span class="r">归还日期：——</span>
+
+而在他下面，还有一行新写的：
+
+<span class="g">你　借阅日期：2025 年 10 月 14 日</span>
+
+<span class="g">归还日期：——</span>
+
+你猛地合上书。
+
+书架深处，传来"沙沙"的翻书声。`,
+  choices:[
+    {t:"把书放回去，立刻离开",to:"l_down_stairs",san:-12},
+    {t:"把这一页撕下来",to:"l_tear",san:-15},
+    {t:"顺着声音走进去",to:"l_deep",san:-18}
+  ]
+},
+"l_tear":{
+  ch:"图书馆",title:"撕书",
+  text:`你抓住第 403 页，用力一撕。
+
+书页撕开的声音，在寂静的图书馆里格外刺耳。
+
+然后，整排书架开始震动。
+
+一本、两本、十本、一百本——《临江校志》从书架上掉下来，砸在地上，摊开，全都停在第 403 页。
+
+每一页上都有名字。
+
+每一页上都有你的名字。
+
+你手里那张纸，开始变烫。
+
+你松开手，纸飘落在地。
+
+落地的一瞬间，它变成了一张借书卡。
+
+卡片上，只有一个名字。
+
+是你的。`,
+  choices:[
+    {t:"捡起卡片，跑下楼",to:"l_down_stairs",san:-15,set:{hasCard:true}},
+    {t:"踩碎这张卡片",to:"l_stomp",san:-12,set:{hasCard:true}}
+  ]
+},
+"l_stomp":{
+  ch:"图书馆",title:"踩",
+  text:`你抬起脚，用力踩下去。
+
+卡片碎了。
+
+碎片像灰一样飘起来，在空中转了一圈，然后重新聚拢。
+
+聚成一张新的卡片。
+
+还是那张卡，还是那个名字。
+
+只是卡片角落，多了一行小字：
+
+<span class="r">"每踩一次，借阅上限 +1"</span>
+
+你低头看。
+
+借阅上限：1 本。
+
+你愣了两秒，然后转身就跑。`,
+  choices:[
+    {t:"冲下楼梯",to:"l_down_stairs",san:-12,set:{limit1:true}}
+  ]
+},
+"l_deep":{
+  ch:"图书馆",title:"深处的声音",
+  text:`你顺着翻书声往里走。
+
+书架越来越密，光线越来越暗。
+
+最后，在一排书架后面，你看见了李薇。
+
+她背对着你，蹲在地上，面前摊着一本书。
+
+"李薇？"
+
+她没有回头。
+
+"你来得正好。"她说，"帮我看看，这一页是不是第 403 页。"
+
+你走过去，低头看。
+
+她面前那本书，是摊开的。左页是 402，右页是——
+
+空白。
+
+"404 页不见了。"李薇说。
+
+"什么意思？"
+
+"这本书一共 403 页。"李薇抬起头，看着你，笑了，"所以最后一页，是 403。"
+
+"但你刚才说，左页是 402。"
+
+"对啊。"李薇说，"那右页就是 403。"
+
+"可它是空白的。"
+
+"不是空白。"李薇把书举起来，对着灯光，"你仔细看。"
+
+灯光透过纸背。
+
+纸上，有字。
+
+很浅很浅的字，像是写完之后被人擦掉，只留下一点凹痕。
+
+你凑近了看。
+
+那两个字是——<span class="r">你的名字。</span>`,
+  choices:[
+    {t:"把书合上",to:"l_close_book",san:-15},
+    {t:"问李薇：你在干什么？",to:"l_ask_liwei2",san:-10}
+  ]
+},
+"l_ask_liwei2":{
+  ch:"图书馆",title:"李薇的回答",
+  text:`"你在干什么？"
+
+李薇低着头，继续看那本书。
+
+"我在找我的名字。"
+
+"找到了吗？"
+
+"找到了。"她指了指左页，"402 页，倒数第三行。"
+
+你低头看。
+
+402 页上确实有一行名字：李薇。
+
+后面写着：<span class="r">【已签】</span>。
+
+"你签了什么？"你问。
+
+"我签了转让协议。"李薇说。
+
+"什么？"
+
+"我把我的名字，转让给了 403 页的那个人。"她抬起头，笑了笑，"这样我就安全了。"
+
+"那 403 页的人呢？"
+
+"403 页的人——"
+
+李薇指了指书。
+
+"就是你啊。"`,
+  choices:[
+    {t:"把书抢过来撕了",to:"l_grab",san:-18},
+    {t:"后退，离开这里",to:"l_down_stairs",san:-15}
+  ]
+},
+"l_grab":{
+  ch:"图书馆",title:"抢",
+  text:`你一把抢过那本书。
+
+书很轻，轻得不像有 403 页。
+
+你翻到 403 页。
+
+空白。
+
+你把书举起来，对着灯光。
+
+纸上有凹痕。
+
+你用手指去摸，摸到了两个字的轮廓。
+
+你没有看清，但你不用看清。
+
+你知道那是你的名字。
+
+你把书用力摔在地上，用脚踩。
+
+"啪嗒。"
+
+书散了。
+
+散成了一地的纸页。
+
+每一页都是空白。
+
+只有一张，慢慢飘到你脚边。
+
+那张纸上，写着：
+
+<span class="r">"谢谢。"</span>`,
+  choices:[
+    {t:"捡起那张纸",to:"l_pick",san:-12},
+    {t:"不管它，跑下楼",to:"l_down_stairs",san:-10}
+  ]
+},
+"l_pick":{
+  ch:"图书馆",title:"那张纸",
+  text:`你弯腰捡起那张纸。
+
+纸很薄，很凉。
+
+你把它翻过来。
+
+背面写着一行小字：
+
+<span class="g">"你可以留着它。"</span>
+
+<span class="g">"在 10 月 14 日之前，把它交给任何一个人。"</span>
+
+<span class="g">"那个人就会代替你。"</span>
+
+你把纸折起来，塞进口袋。
+
+口袋里的《新生手册》，忽然变得很重。
+
+你低头看。
+
+手册的封皮上，那个烫金的"403"，正在慢慢变红。`,
+  choices:[
+    {t:"快步下楼离开",to:"l_down_stairs",san:-12,set:{hasTransfer:true}}
+  ]
+},
+"l_close_book":{
+  ch:"图书馆",title:"合上",
+  text:`你伸手，把书合上了。
+
+"啪。"
+
+李薇抬起头，看着你。
+
+"你干什么？"
+
+"别看了。"
+
+"我快找到了。"她伸手要抢。
+
+你按住书。
+
+"李薇，你听我说。"
+
+"你已经在 402 页上了。"
+
+"你已经签过字了。"
+
+李薇愣住了。
+
+她慢慢松开手，坐到地上，摘下眼镜，用袖子擦了擦。
+
+"我知道。"她说。
+
+"我早就知道了。"
+
+"我只是想看看，我到底变成了哪一本书。"`,
+  choices:[
+    {t:"拉她起来，一起下楼",to:"l_leave_together",san:-8},
+    {t:"自己下楼",to:"l_down_stairs",san:-10}
+  ]
+},
+"l_leave_together":{
+  ch:"图书馆",title:"一起",
+  text:`你把李薇拉起来。
+
+她很轻。比看上去轻很多。
+
+你们一起走下楼梯。
+
+到了一楼，前台的灯还亮着。老太太还在整理卡片。
+
+"找到了？"她问。
+
+"找到了。"李薇说。
+
+"那还回去吗？"
+
+李薇沉默了很久。
+
+"还。"她说。
+
+老太太点点头，从盒子里抽出一张卡片，递给李薇。
+
+卡片上印着"李薇"两个字。
+
+借阅上限：0。
+
+李薇接过卡片，把它撕成两半，放在柜台上。
+
+"我不借了。"她说。
+
+老太太看着那两半卡片，叹了口气。
+
+"行吧。"她说，"那我就记一下。"
+
+她拿起笔，在一本厚厚的册子上写了一行。
+
+你瞥了一眼。
+
+册子的最后一栏，写着：
+
+<span class="r">2025 年 10 月 14 日　李薇　【未还】</span>`,
+  choices:[
+    {t:"拉着李薇离开图书馆",to:"l_out",san:-8,set:{liweiAlive:true}}
+  ]
+},
+"l_down_stairs":{
+  ch:"图书馆",title:"下楼",
+  text:`你转身下楼。
+
+楼梯很窄，你走得很快。
+
+走到一半，你听见身后有翻书声，跟在你身后，越来越近。
+
+你没有回头。
+
+到了一楼，前台的老太太还在。
+
+"找到你要的书了吗？"
+
+"没有。"
+
+"那就好。"她说，"没找到，就是最好的结果。"
+
+她递给你一张卡片。
+
+是你刚进门时那张，借阅上限：0。
+
+"拿好。"她说，"别丢。"
+
+"丢了会怎么样？"
+
+"丢了，你就要留在这里，当一本书。"`,
+  choices:[
+    {t:"收好卡片，离开图书馆",to:"l_out",san:-6}
+  ]
+},
+"l_out":{
+  ch:"图书馆",title:"出门",
+  text:`你走出图书馆。
+
+天已经黑了。路灯亮起来。
+
+你站在台阶上，回头看了一眼。
+
+图书馆的二楼，窗户里透出微弱的光。
+
+窗帘后面，有一个人的轮廓。
+
+她正站在窗边，低着头，看书。
+
+你想起老太太的话：<span class="r">图书馆闭馆时间是 22:00。若 22:00 后馆内仍亮着灯，那不是图书馆。</span>
+
+你加快脚步，往回走。`,
+  choices:[
+    {t:"回寝室",to:"d_back_dorm"},
+    {t:"去食堂吃点东西",to:"c_enter"},
+    {t:"去操场走走",to:"m_playground"}
+  ]
+},
+"l_white_dress":{
+  ch:"图书馆",title:"《白裙》",
+  text:`你在图书馆的书架上，找到了那本书。
+
+书名就叫《白裙》。封面是白色的，没有作者，没有出版社。
+
+你翻开。
+
+第一页写着：
+
+<span class="r">"2025 年 9 月 8 日，我坐在食堂最角落。"</span>
+
+<span class="r">"我的面前有四样菜。"</span>
+
+<span class="r">"我知道我不该吃，但我还是吃了。"</span>
+
+<span class="r">"因为我太饿了。"</span>
+
+你继续往下翻。
+
+第二页：
+
+<span class="r">"9 月 9 日，我发现我的裙子变白了。"</span>
+
+<span class="r">"9 月 10 日，我发现没有人能看清我的脸。"</span>
+
+<span class="r">"9 月 11 日，我坐在图书馆里，发现自己变成了一本书。"</span>
+
+最后一页：
+
+<span class="r">"如果你在读这本书，说明你已经看见我了。"</span>
+
+<span class="r">"请你记住我的名字。"</span>
+
+<span class="r">"我的名字是——"</span>
+
+后面的字，被撕掉了。`,
+  choices:[
+    {t:"把书合上，放回书架",to:"l_out",san:-10},
+    {t:"在空白处写下自己的名字",to:"l_write_name",san:-20},
+    {t:"去食堂找那个白裙子女生",to:"c_enter",san:-6}
+  ]
+},
+"l_write_name":{
+  ch:"图书馆",title:"写下名字",
+  text:`你掏出笔，在空白处写下自己的名字。
+
+笔尖刚离开纸面，书页就渗出一行新的字。
+
+<span class="r">"谢谢你。"</span>
+
+<span class="r">"现在，你有名字了。"</span>
+
+你愣住。
+
+你低头看自己的手。
+
+你的手，正在变得透明。
+
+你赶紧把名字划掉。
+
+划了三道。
+
+手恢复了一点。
+
+但书页上，又渗出新的字：
+
+<span class="g">"没关系。你已经借过了。"</span>
+
+<span class="g">"借阅上限：1。"</span>`,
+  choices:[
+    {t:"把书塞回书架，跑出去",to:"l_out",san:-18,set:{borrowed:true}}
+  ]
+},
+
+/* ═══════════════ 其他场景 ═══════════════ */
+
+"m_playground":{
+  ch:"校园",title:"操场",
+  text:`操场在校园东侧，跑道是红色的，中间是草坪。
+
+傍晚的操场有不少人，跑步的、踢球的、坐在草地上聊天的。
+
+你在跑道边坐下，看着夕阳。
+
+这是你入学以来，第一次觉得正常。
+
+"同学。"
+
+你转头。
+
+一个穿运动服的女生站在你旁边，手里拿着两瓶水。
+
+"能帮我个忙吗？"她指了指跑道，"我在数圈数，数到第十圈的时候，帮我喊一声。"
+
+"好。"
+
+她跑了起来。
+
+一圈、两圈、三圈……
+
+你数着。
+
+数到第八圈的时候，你忽然意识到——
+
+跑道上只有她一个人。
+
+但她经过你身边的时候，你听见的是两个人的脚步声。
+
+数到第九圈。
+
+她跑过你身边，气喘吁吁地说：
+
+"还有一圈。"
+
+你低头看。
+
+她的脚下，有两道影子。`,
+  choices:[
+    {t:"数到第十圈时，喊一声",to:"m_play_count",san:-8},
+    {t:"立刻离开操场",to:"m_play_leave",san:-10},
+    {t:"跟着她跑",to:"m_play_run",san:-14}
+  ]
+},
+"m_play_count":{
+  ch:"校园",title:"第十圈",
+  text:`第十圈。
+
+她跑到你面前，停下来。
+
+"几圈了？"
+
+"十圈。"
+
+她笑了笑，弯腰撑着膝盖喘气。
+
+"谢谢。"
+
+她转身要走。
+
+"等等。"你叫住她，"你……为什么要在晚上跑步？"
+
+她回过头。
+
+"因为白天跑，会被人看见。"
+
+"看见什么？"
+
+"看见我只有一个人。"
+
+她走了。
+
+你低头看跑道。她刚才站过的地方，有两个湿脚印。
+
+一大一小。`,
+  choices:[
+    {t:"回寝室",to:"d_back_dorm",san:-8}
+  ]
+},
+"m_play_leave":{
+  ch:"校园",title:"离开",
+  text:`你站起来，转身就走。
+
+身后传来脚步声。
+
+"同学，你去哪儿？还有一圈呢。"
+
+你没有回头，加快了脚步。
+
+脚步声也跟着快了。
+
+"就一圈。"那个声音说，"你答应过我的。"
+
+你跑了起来。
+
+跑出操场，跑过林荫道，跑进宿舍楼。
+
+上楼，进门，关门，反锁。
+
+你靠在门上喘气。
+
+门外，传来轻轻的敲门声。
+
+"咚。咚。咚。"
+
+三下。`,
+  choices:[
+    {t:"看猫眼",to:"d_knock_peek",san:-10},
+    {t:"装睡，不理",to:"d_knock_ignore",san:-6}
+  ]
+},
+"m_play_run":{
+  ch:"校园",title:"跟着跑",
+  text:`你站起来，跟着她跑。
+
+她的速度不快，但你怎么追都追不上。
+
+跑道在你脚下延伸。一圈，两圈，三圈。
+
+你数着。
+
+数到第十圈的时候，你抬头。
+
+前面已经没有人了。
+
+你停下来，喘着气。
+
+跑道边上，放着一瓶没开过的水。
+
+水瓶上贴着一张标签：
+
+<span class="r">"谢谢陪我。"</span>
+
+<span class="r">"我叫小满，2024 级。"</span>
+
+<span class="r">"去年 10 月 14 日，我在操场上跑丢了。"</span>`,
+  choices:[
+    {t:"拿起那瓶水",to:"m_take_water",san:-10},
+    {t:"不拿，回寝室",to:"d_back_dorm",san:-8}
+  ]
+},
+"m_take_water":{
+  ch:"校园",title:"那瓶水",
+  text:`你拿起那瓶水。
+
+水是冰的。
+
+你拧开盖子，犹豫了一下。
+
+你想起食堂的警告：不要吃第四样。
+
+但这是一瓶水。
+
+你喝了一口。
+
+很甜。
+
+你回到寝室，倒头就睡。
+
+第二天早上，你醒来，发现自己床头的日历上，多了一个日期：
+
+<span class="r">10 月 14 日</span>
+
+红笔圈出来的。
+
+你撕掉那一页。第二天，它又出现了。`,
+  choices:[
+    {t:"去上课",to:"t_enter",san:-12,set:{waterDrunk:true}},
+    {t:"去找陈默",to:"d_chen_talk",san:-8,set:{waterDrunk:true}}
+  ]
+},
+
+"d_leave":{
+  ch:"寝室",title:"出门",
+  text:`你收拾好书包，准备出门。
+
+陈默在你身后说：
+
+"今天去哪儿？"
+
+"上课。"
+
+"哪栋楼？"
+
+"西教学楼。"
+
+陈默沉默了一下。
+
+"西教学楼的电梯，不要坐。"
+
+"我知道。"
+
+"还有——"她顿了顿，"今天如果点名，点到你，只答一次。"
+
+"如果点到第二次呢？"
+
+"那就别答。"
+
+"为什么？"
+
+"因为第二次点到的，不是你。"`,
+  choices:[
+    {t:"记住了，出门",to:"t_enter",set:{knowsRollcall:true}},
+    {t:"问她：怎么分辨？",to:"d_rollcall_how",san:-5,set:{knowsRollcall:true}}
+  ]
+},
+"d_rollcall_how":{
+  ch:"寝室",title:"怎么分辨",
+  text:`"怎么分辨是不是我？"
+
+陈默抬起头。
+
+"听声音。"
+
+"老师叫你的名字，第一次，是从讲台方向传来的。"
+
+"第二次，是从你身后传来的。"
+
+"如果你回头，你就答应了。"
+
+"答应了会怎么样？"
+
+"答应了，你就是她点的那个人。"
+
+"她点的那个人是谁？"
+
+陈默没有回答。
+
+她低下头，继续擦她那双旧布鞋。
+
+那双鞋，一直很干净。`,
+  choices:[
+    {t:"出门上课",to:"t_enter",set:{knowsRollcall:true,chenTrust:5}}
+  ]
+},
+
+/* ═══════════════ 结局 ═══════════════ */
+
+"e_dawn_mid":{
+  ch:"结局",ending:true,
+  title:"结局 · 黎明",
+  text:`你躺下。
+
+床很软，被子有阳光的味道。
+
+你闭上眼睛。
+
+这一次，你睡得很沉，没有梦。
+
+第二天早上，闹钟响了。
+
+你睁开眼。
+
+寝室里，苏也在刷牙，李薇在找眼镜，陈默坐在床边系鞋带。
+
+一切正常。
+
+你摸出《新生手册》。
+
+封皮上的烫金数字，从"403"变成了"——"。
+
+你翻开最后一页。
+
+空白纸上，那个浅浅的凹痕消失了。
+
+干干净净。
+
+你合上手册，扔进了垃圾桶。
+
+然后背上书包，出门上课。
+
+阳光很好。
+
+你想，也许今年，你可以正常地过一个学期。
+
+也许。
+
+——【黎明】结局达成。`,
+  ending:"黎明",rank:"A"
+},
+
+"e_dropout":{
+  ch:"结局",ending:true,
+  title:"结局 · 退学",
+  text:`你去了教务处。
+
+教务处在一栋很新的大楼里，空调开得很足。
+
+窗口后面的老师很和气。
+
+"想退学？"
+
+"是。"
+
+"为什么？"
+
+"……不适应。"
+
+老师笑了笑，从抽屉里拿出一张表。
+
+"填吧。填完在这儿签字。"
+
+你拿起笔，正要写。
+
+笔尖悬在纸上。
+
+你想起陈默说过的话：
+
+"那个老师看了我一眼，说：'你确定？'"
+
+"我说确定。"
+
+"她就把一本册子推到我面前，让我签字。"
+
+"我签了。"
+
+"然后我醒来的时候，还躺在 403 的床上。"
+
+你放下笔。
+
+"老师，"你说，"我想再考虑一下。"
+
+老师抬起头，看着你，笑了。
+
+"好。"她说，"随时欢迎你回来。"
+
+"我们这儿，永远有人等你。"
+
+——【退学】结局达成。`,
+  ending:"退学",rank:"C"
+},
+
+"e_replace":{
+  ch:"结局",ending:true,
+  title:"结局 · 被替换",
+  text:`你坐下了。
+
+椅子很凉。
+
+教室里的三十多个人，都转过头来看着你，露出满意的笑容。
+
+讲台上的老师，在黑板上写下你的名字，然后擦掉。
+
+"从今天起，"她说，"你就是第 4 个。"
+
+"第 4 个什么？"
+
+"第 4 个位置。"她说，"每年，这个位置都会空出来。"
+
+"然后，就会有一个人被填进来。"
+
+"今年是你。"
+
+"明年，会是谁呢？"
+
+你低下头，发现自己的手正在变成纸。
+
+很薄很白的纸。
+
+你的名字，正从你身上一点点脱落。
+
+教室里响起了下课铃。
+
+——【被替换】结局达成。`,
+  ending:"被替换",rank:"F"
+},
+
+"e_13f_end":{
+  ch:"结局",ending:true,
+  title:"结局 · 十三楼的住户",
+  text:`你推开了门。
+
+门后是一间教室。
+
+教室里坐满了人，全都背对着你。
+
+讲台上，老师转过身来。
+
+"欢迎。"
+
+"你迟到了整整四年。"
+
+"没关系，从今天开始，你就在这里上课。"
+
+"上到什么时候？"
+
+"上到有人来替你。"
+
+你找了个位置坐下。
+
+前排的同学转过头，对你笑了笑。
+
+她穿着深蓝色的外套。
+
+"别担心。"她说，"这里挺好的。"
+
+"没有考试，没有论文，也没有毕业。"
+
+"只有一节课，一直上下去。"
+
+窗外的天，永远是黄昏。
+
+——【十三楼的住户】结局达成。`,
+  ending:"十三楼的住户",rank:"F"
+},
+
+"e_blue":{
+  ch:"结局",ending:true,
+  title:"结局 · 深蓝",
+  text:`你看清了她的脸。
+
+那是你自己的脸。
+
+只是穿着一件深蓝色的外套。
+
+"你好。"她说，"我等这一天很久了。"
+
+"你是——"
+
+"我是上一届的第四个。"她说，"我签了字，所以我活了下来。"
+
+"但活下来，是有代价的。"
+
+"代价就是，我得找到下一个人。"
+
+"找到下一个，愿意签字的人。"
+
+她从口袋里掏出一本深红色的册子。
+
+《临江大学 · 新生手册》。
+
+烫金的数字是"403"。
+
+"签吧。"她把笔递给你，"签了，你就自由了。"
+
+你接过笔。
+
+笔很凉。
+
+——【深蓝】结局达成。`,
+  ending:"深蓝",rank:"F"
+},
+
+"e_13f_class":{
+  ch:"结局",ending:true,
+  title:"结局 · 第 13 讲",
+  text:`你走进教室，坐下了。
+
+这一节课，讲了很多东西。
+
+讲了怎么把一个人的名字，写在另一个位置上。
+
+讲了怎么把一个人的记忆，装进另一个身体里。
+
+讲了怎么让一个人，心甘情愿地留下来。
+
+下课铃响了。
+
+老师合上书。
+
+"今天的作业是——"
+
+"请各位同学，回去之后，找一个愿意代替你的人。"
+
+"找到了，下节课带来。"
+
+你站起来，走出教室。
+
+走廊里，你看见镜子里的自己。
+
+你穿着深蓝色的外套。
+
+——【第 13 讲】结局达成。`,
+  ending:"第 13 讲",rank:"F"
+},
+
+"e_dark":{
+  ch:"结局",ending:true,
+  title:"结局 · 黑暗",
+  text:`你走向右边的黑暗。
+
+越走越黑，黑到看不见自己的手。
+
+你听见有人在前面说话。
+
+"又一个。"
+
+"今年的第四个。"
+
+"可怜。"
+
+你停下脚步。
+
+"谁？"
+
+"我们。"那些声音说，"我们是往年的第四个。"
+
+"我们都在这里。"
+
+"这里很好，很安静。"
+
+"你也可以留下来。"
+
+"留下来，就不用数楼梯了。"
+
+"就不用看猫眼了。"
+
+"就不用怕 10 月 14 日了。"
+
+你站在原地，很累，很累。
+
+然后你坐了下来。
+
+黑暗拥抱了你。
+
+——【黑暗】结局达成。`,
+  ending:"黑暗",rank:"F"
+},
+
+"e_canteen":{
+  ch:"结局",ending:true,
+  title:"结局 · 第四样菜",
+  text:`你吃了那第四样菜。
+
+味道很好。好得不像话。
+
+你吃完，端着空盘子站起来，觉得浑身温暖。
+
+食堂里所有人都看着你，微笑着。
+
+打菜的阿姨摘下帽子，对你鞠了一躬。
+
+"谢谢你。"她说，"今年的名额，凑齐了。"
+
+你走出食堂。
+
+阳光很好。你走在梧桐道上，脚步轻快。
+
+你想起一件事。
+
+你不记得自己叫什么名字了。
+
+你摸了摸口袋，手册还在。
+
+封皮上的烫金数字，变成了"404"。
+
+你翻开最后一页，上面写着：
+
+<span class="r">"2025 年 10 月 14 日　第四样　【已签】"</span>
+
+——【第四样菜】结局达成。`,
+  ending:"第四样菜",rank:"F"
+},
+
+"e_lib":{
+  ch:"结局",ending:true,
+  title:"结局 · 一本书",
+  text:`你在借书卡上，写下了自己的名字。
+
+写完的瞬间，你感觉身体变轻了。
+
+很轻，很轻，轻到可以飘起来。
+
+图书馆的灯一盏一盏地灭了。
+
+老太太站起来，走到书架前，把你插进一个空位。
+
+"这一排都是 403 的。"她说，"你是今年的第四本。"
+
+"以前的三本呢？"
+
+"前面那三本。"老太太指了指。
+
+你顺着她的手看去。
+
+书架上，三本书并排立着。
+
+书脊上分别写着：
+
+<span class="r">苏也</span>　<span class="r">李薇</span>　<span class="r">陈默</span>
+
+"她们什么时候来的？"
+
+"昨天。"老太太说，"她们比你早一天。"
+
+"那我的书名呢？"
+
+"你的书名，就是你的名字。"
+
+老太太关上了灯。
+
+图书馆里，一片安静。
+
+只有偶尔，会有翻书的声音。
+
+——【一本书】结局达成。`,
+  ending:"一本书",rank:"F"
+},
+
+"e_loop":{
+  ch:"结局",ending:true,
+  title:"结局 · 大二",
+  text:`你活到了期末。
+
+考试、放假、回家。
+
+你坐在回家的火车上，看着窗外的风景，长长地舒了一口气。
+
+终于结束了。
+
+寒假过完，你回到学校。
+
+拖着行李箱，站在校门下。
+
+九月的风里有一股铁锈味。
+
+你抬头看牌匾。"临江大学"四个字，是暗红色的。
+
+你掏出手机。
+
+新生群还在跳消息：
+
+【新生A】有人知道为什么官网的校历只排到12月31日吗？
+【新生B】别问。
+【新生B】别问。
+【新生B】别问。
+【学姐-周】欢迎来到临江大学。请务必保管好你的《新生手册》。
+
+你愣住了。
+
+你低头看手机日期。
+
+<span class="r">九月八日。</span>
+
+你的行李里，有一本深红色的册子，烫金的数字是"403"。
+
+你翻开第一页。
+
+校长致辞：<span class="r">"希望各位同学在临江大学度过四年，或者更久，或者更短……"</span>
+
+你合上册子，往宿舍楼走去。
+
+梧桐叶绿得发黑。
+
+——【大二】结局达成。`,
+  ending:"大二",rank:"D"
+},
+
+"e_selfstudy":{
+  ch:"结局",ending:true,
+  title:"结局 · 永远的晚自习",
+  text:`你被困在 13 楼的教室里。
+
+老师讲了一节课，又一节课。
+
+第一节讲"如何成为别人"。
+
+第二节讲"如何让别人成为你"。
+
+第三节讲"如何忘记自己的名字"。
+
+下课铃响了，又响了。
+
+你坐在座位上，看着窗外。
+
+窗外永远是黄昏。
+
+你身边的同学换了一批又一批。
+
+有时候你转过头，发现旁边坐着的人，你认识。
+
+有时候你发现，那是你自己。
+
+后来你不再转头了。
+
+你只是低头做题。
+
+题目是：
+
+<span class="r">"请写出你的名字。"</span>
+
+你拿着笔，迟迟没有写下去。
+
+因为你已经不记得了。
+
+——【永远的晚自习】结局达成。`,
+  ending:"永远的晚自习",rank:"F"
+},
+
+"e_rule":{
+  ch:"结局",ending:true,
+  title:"结局 · 成为规则",
+  text:`你活过了 10 月 14 日。
+
+但代价是，你在 403 的门后，写下了一行字。
+
+那行字，是第七条。
+
+写完的一瞬间，你感觉自己的身体变得很薄，很轻，像一张纸。
+
+你飘起来，贴在了门后。
+
+门后那张泛黄的规则上，多了第七条：
+
+<span class="r">"七、不要在半夜，数寝室里有几张床。"</span>
+
+然后你看见门被推开。
+
+一个拖着行李箱的新生走了进来。
+
+她环顾四周，数了数。
+
+"一、二、三……"
+
+她愣住了。
+
+"怎么只有三张床？"
+
+你想开口提醒她。
+
+但你只是一行字。
+
+你什么也做不了。
+
+——【成为规则】结局达成。`,
+  ending:"成为规则",rank:"S"
+},
+
+"e_grad":{
+  ch:"结局",ending:true,
+  title:"结局 · 毕业",
+  text:`你做到了。
+
+你在 10 月 14 日之前，找到了 1999 年版《临江校志》的第 403 页。
+
+你把自己的名字划掉了。
+
+然后，你在手册的最后一页，写下了另一行字：
+
+<span class="r">"名额：作废。"</span>
+
+那一晚，整栋宿舍楼都停电了。
+
+黑暗中，你听见无数人在走廊里走动。她们走了一整夜。
+
+天亮的时候，你打开门。
+
+走廊里空无一人。
+
+地上散落着很多张借书卡，每一张上面都写着名字。
+
+你把它们一张张捡起来，抱到图书馆，放在前台。
+
+老太太看了看那摞卡片，又看了看你。
+
+"你知道这意味着什么吗？"
+
+"什么？"
+
+"意味着，很多人的名字，终于可以还给你们了。"
+
+她站起来，对你鞠了一躬。
+
+那是你见过的，最老的一个鞠躬。
+
+四年后。
+
+你穿着学士服，站在校门口。
+
+牌匾上的字，颜色淡了很多。
+
+你把手里的《新生手册》扔进垃圾桶。
+
+这一次，它没有回来。
+
+你转身离开。
+
+身后，校门上的字，慢慢变回了普通的红漆。
+
+——【毕业】结局达成。
+
+<span class="g">（真结局 · 感谢游玩）</span>`,
+  ending:"毕业",rank:"SS"
+},
+
+"e_mad":{
+  ch:"结局",ending:true,
+  title:"结局 · 你成了流言",
+  text:`你的理智归零了。
+
+你不再相信任何人，也不再相信自己的眼睛。
+
+你开始数楼梯。一遍，一遍，一遍。
+
+你开始看猫眼。一看就是几个小时。
+
+你开始在半夜，对着镜子说话。
+
+"我在这里。"
+
+"我在这里。"
+
+"我在这里。"
+
+后来，寝室里的人搬走了。
+
+再后来，没有人知道 403 住过谁。
+
+只有新生群里偶尔会有人说：
+
+"听说 403 有个学姐，半夜会在走廊里走。"
+
+"她会敲门。"
+
+"她会问：同学，我的钥匙掉了，能帮我开下门吗？"
+
+"千万别开。"
+
+"那不是学姐。"
+
+——【你成了流言】结局达成。`,
+  ending:"你成了流言",rank:"F"
+},
+
+"e_namelist":{
+  ch:"结局",ending:true,
+  title:"结局 · 名单上的人",
+  text:`你在《临江校志》第 403 页上，看见了自己的名字。
+
+不是空白，不是凹痕。
+
+是真真切切印上去的名字。
+
+你盯着那三个字，盯了很久。
+
+然后你意识到——
+
+你已经不在书外面了。
+
+你在书里面。
+
+你在看着一个新生，翻开这本书，看到你的名字。
+
+就像你现在这样。
+
+你想告诉她：快跑。
+
+可是书页上，只能留下文字。
+
+于是你在名字旁边，用尽全力，写下了一行小字。
+
+那行字是：
+
+<span class="r">"别签。"</span>
+
+——【名单上的人】结局达成。`,
+  ending:"名单上的人",rank:"C"
+},
+
+"e_guard":{
+  ch:"结局",ending:true,
+  title:"结局 · 守夜人",
+  text:`你找到保安，把事情全部告诉了她。
+
+她听完，沉默了很久。
+
+"你想好了？"
+
+"想好了。"
+
+"守夜人，一做就是二十年。"她说，"不能离开这栋楼。"
+
+"楼里所有的人，你都要记住她们的名字。"
+
+"少记住一个，就会多一个名额。"
+
+"你确定？"
+
+"我确定。"
+
+她点点头，从抽屉里拿出一顶帽子，递给你。
+
+"戴上吧。"
+
+你戴上帽子，站在教学楼一楼的大厅里。
+
+灯很亮。
+
+钟表走着，一格，一格。
+
+窗外，天黑了，又亮了。
+
+很多年过去了。
+
+你记住了一届又一届学生的名字。
+
+偶尔有新生跑来问你：
+
+"师傅，这栋楼有 13 层吗？"
+
+你会说：
+
+"没有。"
+
+"你记错了。"
+
+——【守夜人】结局达成。`,
+  ending:"守夜人",rank:"A"
+},
+
+"e_balcony":{
+  ch:"结局",ending:true,
+  title:"结局 · 阳台",
+  text:`你走到阳台上，想透透气。
+
+夜里的风很凉。
+
+你扶着栏杆，看着校园里的灯。
+
+"你也睡不着？"
+
+一个声音从旁边传来。
+
+你转头。
+
+阳台的另一头，站着一个人。
+
+是李薇。
+
+"你什么时候来的？"
+
+"一直在这儿。"李薇说，"我在等一个人。"
+
+"等谁？"
+
+"等一个愿意听我说话的人。"
+
+她转过身，看着你。
+
+"你知道吗？我们寝室，其实有四个人。"
+
+"我知道。"
+
+"不，你不知道。"李薇说，"我说的不是苏也、陈默和你。"
+
+"我说的是——那个一直站在阳台上的。"
+
+你顺着她的目光，往阳台角落看去。
+
+那里什么都没有。
+
+但栏杆上，有一双手印。
+
+很新。
+
+——【阳台】结局达成。`,
+  ending:"阳台",rank:"C"
+},
+
+"e_chen":{
+  ch:"结局",ending:true,
+  title:"结局 · 陈默的结局",
+  text:`你终于问出了那个问题。
+
+"陈默，你到底是谁？"
+
+她放下手里的布鞋，抬起头。
+
+"我是 2022 级的。"
+
+"那年，403 住了四个人。"
+
+"我是第四个。"
+
+"10 月 14 日，我签了字。"
+
+"我签给了苏也。"
+
+你愣住了。
+
+"所以苏也——"
+
+"苏也不是苏也。"陈默说，"她是上一届的第四个。"
+
+"李薇也不是李薇。她是 2023 年的。"
+
+"我们都是。"
+
+"我们都在等今年的第四个。"
+
+她站起来，走到你面前。
+
+"恭喜你。"
+
+"你就是今年的第四个。"
+
+"你活到了最后。"
+
+"现在，轮到你签字了。"
+
+她把一本深红色的手册，放在你面前。
+
+翻开最后一页。
+
+空白处，已经写好了三个名字：
+
+苏也。李薇。陈默。
+
+第四行，等着你。
+
+——【陈默的结局】结局达成。`,
+  ending:"陈默的结局",rank:"F"
+},
+
+"e_out":{
+  ch:"结局",ending:true,
+  title:"结局 · 逃出校门",
+  text:`你什么都没带，就这么跑出了校门。
+
+门口没有保安。栏杆是抬起来的。
+
+你跑过梧桐道，跑过校牌，跑上了外面的马路。
+
+你回头。
+
+"临江大学"四个字，在夜色里，暗红得发亮。
+
+你拦了一辆出租车。
+
+"去哪儿？"
+
+"随便，越远越好。"
+
+车开了。
+
+你靠在座位上，闭上眼睛，浑身发抖。
+
+五分钟后，司机说："到了。"
+
+你睁开眼。
+
+车窗外，是"临江大学"的校门。
+
+"你怎么开回来的？"
+
+司机转过头。
+
+她穿着深蓝色的外套。
+
+"同学，"她说，"你还没交学费呢。"
+
+——【逃出校门】结局达成。`,
+  ending:"逃出校门",rank:"F"
+},
+
+"e_dawn":{
+  ch:"结局",ending:true,
+  title:"结局 · 未完成的告别",
+  text:`你活过了这一年。
+
+没有变成书，没有变成菜，没有变成规则。
+
+你只是活了下来。
+
+毕业那天，你回到 403，收拾行李。
+
+门后的那张规则，还贴在那里。
+
+第七条的位置，依旧是涂抹的痕迹。
+
+你伸手，把它撕了下来。
+
+纸很脆，一撕就碎。
+
+碎片落在地上，你看见上面有一行很小的字，是之前被涂抹遮住的。
+
+那行字是：
+
+<span class="r">"七、请记住你还活着。"</span>
+
+你愣了很久。
+
+然后你把碎片收进口袋，背上行李，走出门。
+
+走廊很长。
+
+你一步一步地走。
+
+这一次，你没有数台阶。
+
+——【未完成的告别】结局达成。`,
+  ending:"未完成的告别",rank:"A"
+},
+
+"e_safe":{
+  ch:"结局",ending:true,
+  title:"结局 · 普通的学期",
+  text:`你什么异常都没有遇上。
+
+上课、吃饭、睡觉、打游戏。
+
+期末考试，你考了个中等。
+
+寒假回家，你把《新生手册》塞在书架最里面，再也没翻过。
+
+第二年九月，你成了学姐。
+
+有个新生在群里问："学姐，为什么校历只排到 12 月 31 日啊？"
+
+你看着这条消息，手指悬在键盘上。
+
+然后你打了三个字：
+
+"别问。"
+
+发送。
+
+——【普通的学期】结局达成。`,
+  ending:"普通的学期",rank:"B"
+}
+
+};
+
+/* ═══════════════════════════════════════════════════════════
+   引擎
+   ═══════════════════════════════════════════════════════════ */
+
+const $ = id => document.getElementById(id);
+let typingTimer = null;
+
+function toast(msg){
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('on');
+  clearTimeout(t._tm);
+  t._tm = setTimeout(()=>t.classList.remove('on'), 1800);
+}
+
+function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
+
+function triggerHorrorEffect(intensity){
+  // 闪屏与震屏特效触发
+  document.body.classList.remove('scare-flash', 'scare-shake');
+  void document.body.offsetWidth; // 触发重绘
+
+  if(intensity === 'heavy'){
+    document.body.classList.add('scare-flash', 'scare-shake');
+  } else {
+    document.body.classList.add('scare-shake');
+  }
+
+  setTimeout(()=>{
+    document.body.classList.remove('scare-flash', 'scare-shake');
+  }, 500);
+}
+
+function goto(id){
+  if(!STORY[id]){ console.error('缺失节点：', id); return; }
+  S.node = id;
+  S.steps++;
+
+  const n = STORY[id];
+  let sanLoss = 0;
+
+  // 效果（只执行一次）
+  if(!S.entered[id]){
+    S.entered[id] = true;
+    if(n.san){
+      sanLoss = n.san;
+      S.sanity += n.san;
+    }
+    if(n.set) Object.assign(S.flags, n.set);
+  }
+  S.sanity = clamp(S.sanity, 0, 100);
+
+  // 触发恐怖特效：理智大幅骤降、危险选项或特殊高能节点
+  if(sanLoss <= -12 || n.danger || id.startsWith('e_') || id.includes('knock_open') || id.includes('13f') || id.includes('stare')){
+    triggerHorrorEffect(sanLoss <= -15 || id.startsWith('e_') ? 'heavy' : 'light');
+  }
+
+  // 理智崩溃
+  if(S.sanity <= 0 && !n.ending){
+    S.node = 'e_mad';
+    triggerHorrorEffect('heavy');
+  }
+
+  autoSave();
+  render();
+}
+
+function render(noAnim){
+  const n = STORY[S.node];
+
+  // 章节
+  $('chapter').textContent = '— ' + (n.ch || '') + ' —';
+
+  // 理智
+  const pct = clamp(S.sanity,0,100);
+  $('sanbar').style.width = pct + '%';
+  $('sanbar').style.background = pct > 60
+    ? 'linear-gradient(90deg,#5d4a2a,#b39a5f)'
+    : pct > 30
+      ? 'linear-gradient(90deg,#6b4a1e,#c08b3a)'
+      : 'linear-gradient(90deg,#5a1c1c,#c04a4a)';
+  $('santxt').textContent = pct;
+
+  // 动态更新恐怖氛围遮罩
+  const overlay = $('horror-overlay');
+  overlay.className = '';
+  if(pct <= 30){
+    overlay.className = 'san-low';
+  } else if(pct <= 55){
+    overlay.className = 'san-mid';
+  }
+
+  // 物品
+  const items = [];
+  if(S.flags.hasCoin) items.push('铜钱');
+  if(S.flags.hasRules) items.push('公约');
+  if(S.flags.hasBook) items.push('校志');
+  if(S.flags.hasPage) items.push('403页');
+  if(S.flags.hasNapkin) items.push('餐巾纸');
+  if(S.flags.hasTransfer) items.push('转让纸');
+  $('itemtxt').textContent = items.length ? '· ' + items.join(' · ') : '';
+
+  const story = $('story');
+  story.innerHTML =
+    '<h1 class="title">' + (n.title||'') + '</h1>' +
+    '<div id="text"></div>';
+  if(!noAnim){
+    story.style.animation='none';
+    void story.offsetWidth;
+    story.style.animation='fade .55s ease';
+  }
+
+  // 处理文本：理智极低(<35)时自动给危险红字附加上故障扭曲重影动效
+  let renderedText = n.text || '';
+  if(pct <= 35){
+    renderedText = renderedText.replace(/class="r"/g, 'class="r glitch-txt"');
+  }
+  typeText($('text'), renderedText);
+
+  const box = $('choices');
+  box.innerHTML = '';
+
+  if(n.ending){
+    const b = document.createElement('div');
+    b.className = 'ending-box';
+    b.innerHTML =
+      '<div class="ending-tag">E N D I N G</div>' +
+      '<div class="ending-name">' + (n.ending) + '</div>' +
+      '<div class="ending-sub">评级 ' + (n.rank||'-') + '　·　步数 ' + S.steps + '　·　剩余理智 ' + S.sanity + '<br><br>你无法重来这一周目。<br>除非读取存档。</div>';
+    box.appendChild(b);
+
+    const btn = document.createElement('button');
+    btn.className = 'ch';
+    btn.style.textAlign = 'center';
+    btn.innerHTML = '读 取 存 档';
+    btn.onclick = openMenu;
+    box.appendChild(btn);
+    return;
+  }
+
+  (n.choices||[]).forEach((c, i)=>{
+    if(c.show && !c.show(S)) return;
+    const key = S.node + ':' + i;
+    if(c.once && S.used[key]) return;
+
+    const btn = document.createElement('button');
+    btn.className = 'ch';
+    btn.innerHTML = c.t + (c.hint ? '<span class="hint">' + c.hint + '</span>' : '');
+    btn.onclick = ()=>{
+      S.used[key] = true;
+      if(c.san) S.sanity += c.san;
+      if(c.set) Object.assign(S.flags, c.set);
+      S.sanity = clamp(S.sanity,0,100);
+
+      // 危险选项点击时直接触发震动反馈
+      if(c.danger || (c.san && c.san <= -10)){
+        triggerHorrorEffect('heavy');
+      }
+
+      goto(c.to);
+    };
+    box.appendChild(btn);
+  });
+
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function typeText(el, txt){
+  clearInterval(typingTimer);
+  el.innerHTML = txt;
+  el.style.opacity = 0;
+  let o = 0;
+  typingTimer = setInterval(()=>{
+    o += 0.08;
+    el.style.opacity = o;
+    if(o >= 1) clearInterval(typingTimer);
+  }, 16);
+}
+
+/* ---------- 菜单 ---------- */
+function openMenu(){
+  const p = $('panel');
+  let html = '<h2>存 档 管 理</h2>';
+
+  const slotNames = {auto:'自动存档', s1:'存档位 1', s2:'存档位 2', s3:'存档位 3', s4:'存档位 4'};
+  ['auto','s1','s2','s3','s4'].forEach(k=>{
+    const d = SLOTS[k];
+    let info = '<b>' + slotNames[k] + '</b><small>（空）</small>';
+    if(d){
+      const t = new Date(d.time);
+      const tm = (t.getMonth()+1) + '/' + t.getDate() + ' ' +
+                 String(t.getHours()).padStart(2,'0') + ':' +
+                 String(t.getMinutes()).padStart(2,'0');
+      const nd = STORY[d.node] || {};
+      info = '<b>' + slotNames[k] + '</b><small>' + tm + '　' +
+             (nd.ch||'') + ' · ' + (nd.title||'') + '　理智 ' + d.state.sanity + '</small>';
+    }
+    html += '<div class="slot"><div class="info">' + info + '</div><div class="acts">';
+    if(k !== 'auto') html += '<button class="mini" onclick="doSave(\'' + k + '\')">存档</button>';
+    if(d) html += '<button class="mini" onclick="doLoad(\'' + k + '\')">读档</button>';
+    html += '</div></div>';
+  });
+
+  html += '<div style="margin-top:16px;padding-top:14px;border-top:1px solid #22242a">';
+  html += '<button class="mini danger" style="width:100%;padding:11px" onclick="doRestart()">重新开始新的一周目（将覆盖自动存档）</button>';
+  html += '</div>';
+  html += '<button class="close" onclick="closeMask()">关 闭</button>';
+
+  p.innerHTML = html;
+  $('mask').classList.add('on');
+}
+function closeMask(){ $('mask').classList.remove('on'); }
+function doSave(k){
+  if(S.node === 'e_mad' || (STORY[S.node] && STORY[S.node].ending)){ toast('结局无法存档'); return; }
+  saveTo(k); toast('已存档'); openMenu();
+}
+function doLoad(k){
+  if(!SLOTS[k]){ toast('该存档位为空'); return; }
+  loadFrom(k);
+  toast('已读档');
+}
+function doRestart(){
+  if(!confirm('确定要重新开始吗？\n\n当前进度将被覆盖，且无法恢复。')) return;
+  S = newState();
+  SLOTS.auto = null;
+  persist();
+  closeMask();
+  render(true);
+}
+
+/* ---------- 标题页 ---------- */
+function initTitle(){
+  loadSaves();
+
+  if(SLOTS.auto){
+    const d = SLOTS.auto;
+    const nd = STORY[d.node] || {};
+    $('btn-continue').style.display = 'block';
+    $('btn-continue').textContent = '继 续（' + (nd.title||'').slice(0,8) + '）';
+  }
+
+  $('btn-continue').onclick = ()=>{
+    if(SLOTS.auto){
+      S = clone(SLOTS.auto.state);
+      S.node = SLOTS.auto.node;
+      hideTitle();
+      render(true);
+    }
+  };
+  $('btn-new').onclick = ()=>{
+    if(SLOTS.auto && !confirm('已有进行中的存档。\n\n开始新的一周目会覆盖自动存档，且无法恢复。\n\n确定吗？')) return;
+    S = newState();
+    hideTitle();
+    goto('start');
+  };
+  $('btn-load').onclick = ()=>{
+    S = S || newState();
+    openMenu();
+  };
+}
+function hideTitle(){
+  $('title-screen').style.display = 'none';
+}
+
+/* ---------- 背景音乐与启动 ---------- */
+const BGM_LIST = [
+  'https://cdn.jsdelivr.net/gh/appleandding/ypyp@main/waltz%20in17edo(%E7%BA%AF%E4%BA%AB%E9%9F%B3%E4%B9%90%E7%89%88)%20-%20NyxLunx%26%E8%8B%8F%E5%AD%90%E5%A2%A8%26Sixteen.mp3',
+  'https://cdn.jsdelivr.net/gh/appleandding/ypyp@main/Waltz%20in%2021edo%20-%20Deister%20Orchestra.mp3'
+];
+let bgmIndex = 0;
+let bgmAudio = new Audio();
+let bgmStarted = false;
+
+function playCurrentBGM(){
+  bgmAudio.src = BGM_LIST[bgmIndex];
+  bgmAudio.play().then(()=>{
+    bgmStarted = true;
+  }).catch(()=>{});
+}
+
+function initBGM(){
+  bgmAudio.preload = 'auto';
+  // 第一首放完自动切第二首，第二首放完切回第一首循环
+  bgmAudio.addEventListener('ended', ()=>{
+    bgmIndex = (bgmIndex + 1) % BGM_LIST.length;
+    playCurrentBGM();
+  });
+
+  // 尝试直接播放
+  playCurrentBGM();
+
+  // 兼容浏览器限制：若初次加载受限，用户点击/触摸屏幕任何地方立即开始播放
+  const unlockAudio = ()=>{
+    if(!bgmStarted){
+      playCurrentBGM();
+    }
+    if(bgmStarted){
+      window.removeEventListener('click', unlockAudio);
+      window.removeEventListener('touchstart', unlockAudio);
+    }
+  };
+  window.addEventListener('click', unlockAudio, { passive: true });
+  window.addEventListener('touchstart', unlockAudio, { passive: true });
+}
+
+window.addEventListener('load', ()=>{
+  S = newState();
+  initTitle();
+  initBGM();
+
+  $('mask').addEventListener('click', e=>{
+    if(e.target === $('mask')) closeMask();
+  });
+
+  console.log('《临江大学·新生手册》剧情节点数：' + Object.keys(STORY).length);
+});
+</script>
+</body>
+</html>
